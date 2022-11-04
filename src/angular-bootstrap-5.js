@@ -1,5 +1,5 @@
 (function() {
-	var bootstrap4 = angular.module('ngBootstrap5', [
+	var bootstrap5 = angular.module('ngBootstrap5', [
 		'bs5.templates', 
 		'bs5.collapse', 
 		'bs5.accordion',
