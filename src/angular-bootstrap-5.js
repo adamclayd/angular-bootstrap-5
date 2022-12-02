@@ -36,12 +36,14 @@
 	
 	collapse.directive('bs5Collapse', ['$parse', function($parse) {
 		return {
-			restrict: 'EA',
+			restrict: 'A',
 			link: function(scope, elm, attrs) {
 				var onExpanding = $parse(attrs.expanding);
 				var onExpanded = $parse(attrs.expanded);
 				var onCollapsing = $parse(attrs.collapsing);
 				var onCollapsed = $parse(attrs.collapsed);
+				
+				elm.addClass('collapse');
 				
 				var collapse = new bootstrap.Collapse(elm[0], {toggle: false});
 				
@@ -237,10 +239,11 @@
 				return attrs.templateUrl || 'angular/bootstrap5/templates/alert/alert.html'
 			},
 			scope: {
-				type: '@',
-				dismissible: '='
+				type: '@?',
+				dismissible: '=?'
 			},
 			link: function(scope, elm, attrs) {
+				scope.type = scope.type || 'primary';
 				scope.close = function() {
 					elm.remove();
 				}
@@ -251,7 +254,7 @@
 	angular.module('angular/bootstrap5/templates/alert/alert.html', []).run(['$templateCache', function($templateCache) {
 		$templateCache.put(
 			'angular/bootstrap5/templates/alert/alert.html',
-			'<div class="alert alert-{{type || \'primary\'}} d-flex align-items-center" ng-class="{\'alert-dismissible\': dismissible}" role="alert">' +
+			'<div class="alert alert-{{type}} d-flex align-items-center" ng-class="{\'alert-dismissible\': dismissible}" role="alert">' +
 				'<ng-transclude></ng-transclude>' +
 				'<button ng-if="dismissible" ng-click="close()" type="button" class="btn-close"></button>' +
 			'</div>'
