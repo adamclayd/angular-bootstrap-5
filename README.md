@@ -251,6 +251,7 @@ module.controller('MainController', ['$scope', $bs5Modal, function($scope, $bs5M
 ...
 ````
 
-# Todo
+# Todo Tasklist
 - [ ] Make pagination move the pages when you get to the last page in the list.
 - [ ] Make a way to return a result for html popovers. May need to put in a promise.
+- [ ] Add a datepicker.
