@@ -330,9 +330,9 @@ Attributes
 	
 	html        - If true the html is allowed in the popover. Default is false.
 	
-	load-cb     - Function callback that is called each time the popover is created and shown.
-	              The function definition is as follows function(scope). Provides a way to access
-	              the scope of the popover.
+	load        - Function that is executed each time the popover is created and shown.
+	              it provides $scope and $popover as passable parameters where $scope is the
+	              scope of the popover and $popover is the bootstrap.Popover object for the element.
 	
 	offset      - Place the popover [x, y] from the center. Default is [0, 0].
 	

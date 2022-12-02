@@ -714,7 +714,7 @@
 		return {
 			restrict: 'A',
 			scope: {
-				onLoad: '=?loadCb'
+				onLoad: '&?load'
 			},
 			link: function(scope, elm, attrs) {
 				var deferred = $q.defer();
@@ -761,8 +761,6 @@
 						offset: angular.isArray(offset) ? offset : [0, 0]
 					});
 					
-					popoverScope.params = {popover: popover};
-					
 					elm.on('shown.bs.popover', function() {
 						var element = $document[0].querySelector('#' + id);
 						
@@ -771,7 +769,7 @@
 							
 							if(angular.isFunction(scope.onLoad)) {
 								scope.$apply(function() {
-									scope.onLoad(popoverScope);
+									scope.onLoad({$scope: popoverScope, $popover: popover});
 								});
 							}
 						}
