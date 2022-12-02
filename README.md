@@ -109,3 +109,42 @@ module.controller('MainController', ['$scope', function($scope) {
 
 ...
 ```
+
+## Tabs
+
+```
+Tabset Attributes
+	active   - Initiate the the active tab. It is an index.
+	
+	type     - The tab type. Can be 'pills' or 'tabs'.
+	
+	vertical - If true then the tabs and the panes will be lined up in a vertical fashion.
+	           The tab type will automatically be set to 'pills' reguardless of what the
+	           type attribute is set to. Default is  false.
+	           
+	justify  - If true then all the tabs will be the same size. Default is false.
+
+
+Tab Attributes
+	heading  - The tab heading.
+	
+	select   - The function to execute after the tab has been selected. $tabIndex and
+	           $event can be passed to the function. 
+	
+	deselect - The function to execute after the tab has been deselected. $tabIndex and
+	           $event can be passed to the function.
+	           
+	disabled - If true the tab will be disabled. It won't be selectable. Default is false.
+```
+
+###### Example
+```html
+<bs5-tabset>
+	<bs5-tab heading="Heading Attribute">
+		... tab content ...
+	</bs5-tab>
+	<bs5-tab>
+		<bs5-tab-heading>Tab Heading Element</bs5-tab-heading>
+		... tab content ...
+	</bs5-tab>
+</bs5-tabset>
