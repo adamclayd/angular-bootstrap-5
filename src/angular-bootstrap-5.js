@@ -277,6 +277,10 @@
 				return attrs.templateUrl || 'angular/bootstrap5/templates/progressbar/progressbar.html';
 			},
 			link: function(scope, elm, attrs) {
+				scope.type = attrs.type ? attrs.type : null;
+				scope.striped =  !!scope.$eval(attrs.striped);
+				scope.animate = !!scope.$eval(attrs.animate) && scope.striped;
+				
 				if(scope.value < 0)
 					scope.value = 0;
 				else if(scope.value > 100)
@@ -312,7 +316,7 @@
 		$templateCache.put(
 			'angular/bootstrap5/templates/progressbar/progressbar.html',
 			'<div class="progress">' +
-				'<div class="progress-bar" style="width: {{value}}%" aria-valuenow="{{value}}" aria-valuemin="0" aria-valuemax="100">' +
+				'<div class="progress-bar {{type ? \'bg-\' + type : \'\'}}" ng-class="{\'progress-bar-striped\': striped, \'progress-bar-animated\': animate}" style="width: {{value}}%" aria-valuenow="{{value}}" aria-valuemin="0" aria-valuemax="100">' +
 					'<span ng-if="displayPercent">{{value}}%</span>' + 
 				'</div>' +
 			'</div>'

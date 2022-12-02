@@ -81,6 +81,13 @@ Progressbar Attributes
 	
 	display-percent - If true it will display the percentage in the middle of the 
 	                  progressbar. Default is false.
+	                  
+	type            - The type of background color for progressbar. Valid values are 'success', 'info',
+	                  'warning', 'danger', and null. Default is null.
+	                  
+	striped         - If true the progressbar will be striped. Default is false.
+	
+	animate         - If true then the stripes will be animated. Default is false.
 ```
 
 ###### HTML File
