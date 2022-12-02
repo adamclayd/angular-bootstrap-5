@@ -34,11 +34,16 @@ module.controller('MainController', ['$scope', function($scope) {
 
 ## Accordion
 
-```
-Accordion Attributes
-	close-others - set to true to only allow one accordion group open at a time. It defaults to true.
 
-Accordion Group Attributes
+#### Directive: bs5Accordion
+```
+Attributes
+	close-others - set to true to only allow one accordion group open at a time. It defaults to true.
+```
+
+#### Directive: bs5AccordionGroup
+```
+Attributes
 	heading - set the title for the accordion group
 	is-open - whether the accordion group is opened or not
 ```
@@ -59,8 +64,9 @@ Accordion Group Attributes
 
 ## Alerts
 
+#### Directive: bs5Alert
 ```
-Alert Attributes
+Attributes
 	type        - Bootstrap alert type. Valid values are 'primary', 'secondary', 'success', 
 	              'danger', 'warning', 'info', 'light', and 'dark'. Default is 'primary'
 	
@@ -75,8 +81,10 @@ Alert Attributes
 
 ## Progressbar
 
+#### Directive: bs5Progressbar
+
 ```
-Progressbar Attributes
+Attributes
 	value           - The percent value to bind with
 	
 	display-percent - If true it will display the percentage in the middle of the 
@@ -119,8 +127,10 @@ module.controller('MainController', ['$scope', function($scope) {
 
 ## Tabs
 
+#### Directive: bs5Tabset
+
 ```
-Tabset Attributes
+Attributes
 	active   - Initiate the the active tab. It is an index.
 	
 	type     - The tab type. Can be 'pills' or 'tabs'.
@@ -130,9 +140,11 @@ Tabset Attributes
 	           type attribute is set to. Default is  false.
 	           
 	justify  - If true then all the tabs will be the same size. Default is false.
+```
 
-
-Tab Attributes
+#### Directive: bs5Tab
+```
+Attributes
 	heading  - The tab heading.
 	
 	select   - The function to execute after the tab has been selected. $tabIndex and
@@ -159,7 +171,7 @@ Tab Attributes
 
 ## Modal
 
-#### $bs5Modal Service
+#### Service: $bs5Modal
 
 The `$bs5Modal` service opens a modal window and returns an object that contains result promise, a close function that
 resolves the result promise and closes the modal, and a dismiss function that simply closes the modal.
@@ -250,6 +262,44 @@ module.controller('MainController', ['$scope', $bs5Modal, function($scope, $bs5M
 
 ...
 ````
+
+
+## Tooltip
+
+#### Directive: bs5Tooltip
+```
+Attributes
+	animate     - Make the tooltip do the fade in animation. Default is true 
+	
+	bs5-tooltip - The tooltip content if templateUrl is not defined.
+
+	delay       - A number or an object with show and hide properties that specifies
+	              the delay when showing or hiding the tooltip. Default is 0.
+	          
+	html        - If true then the tooltip can contain html. Default is false.
+	
+	load-cb     - A function callback that is called when the tooltip is created. The function
+	              defination is as follows function(scope).
+	
+	offset      - Array [x, y] to offset the tooltip. Default is [0, 0].
+	
+	placement  - The placement of the tooltip on the element. Valid values are 'top', 'left', 
+	             'bottom', and 'right'. Default is 'top'.
+	
+	templateUrl - The url to the html content that will be put in the tooltip. If defined then
+                   html option will be true.
+                   
+    trigger      - The way the tooltip is triggered. Valid values are 'hover', 'focus', and 'click'.
+                   Default is 'hover'
+```
+
+###### Example
+```html
+<button type="button" class="btn btn-primary" bs5-tooltip="<strong>Test Tooltip</strong>" html="true">Tooltip</button>
+```
+
+
+
 
 # Todo Tasklist
 - [ ] Make pagination move the pages when you get to the last page in the list.
