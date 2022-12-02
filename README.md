@@ -427,5 +427,6 @@ module.controller('MainController', ['$scope', function($scope) {
 ```
 
 ## Todo Tasklist
-- [ ] Make pagination move the pages when you get to the last page in the list.
+- [x] Make pagination move the pages when you get to the last page in the list
+- [ ] Make pagination work if the number of pages gets changed.
 - [ ] Add a datepicker.
