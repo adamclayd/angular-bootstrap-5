@@ -520,7 +520,7 @@
 		$templateCache.put(
 			'angular/bootstrap5/templates/tabs/tab.html',
 			'<li class="nav-item">' +
-				'<button class="nav-link" ng-class="{active: active, disabled: disabled}" ng-click="select($event)" bs5-heading-transclude>{{heading}}</button>' +
+				'<button class="nav-link" ng-disabled="disabled" ng-class="{active: active, disabled: disabled}" ng-click="select($event)" bs5-heading-transclude>{{heading}}</button>' +
 			'</li>'
 		)
 	}]);
