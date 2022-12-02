@@ -289,8 +289,8 @@ Attributes
 	templateUrl - The url to the html content that will be put in the tooltip. If defined then
                    html option will be true.
                    
-	trigger    - The way the tooltip is triggered. Valid values are 'hover', 'focus', and 'click'.
-                  Default is 'hover'
+	trigger     - The way the tooltip is triggered. Valid values are 'hover', 'focus', and 'click'.
+	              Default is 'hover'
 ```
 
 ###### Example
@@ -331,6 +331,9 @@ Attributes
 	            
 	title      - The title of the popover that is displayed in the header of the popover.
 	             Default is a blank string ('').
+	             
+	trigger    - The type of event that is used to trigger the popover. Valid values are
+	             'click', 'h'hover'and 'focus'. Default is 'click'.
 	            
 	
 ```
