@@ -9,7 +9,7 @@ It is tested and works with Bootstrap v5.1.3.
 The `bs5-collapse` attribute is a boolean to determine if the collapse is collapsed or not. Set to `true` to hide the collapse.
 Set to `false` to expand the collapse.
 
-#### HTML File
+##### HTML File
 ```html
 ...
 <div ng-controller="MainController">
@@ -22,7 +22,7 @@ Set to `false` to expand the collapse.
 
 ```
 
-#### Javascript File
+##### Javascript File
 ```javascript
 ...
 module.controller('MainController', ['$scope', function($scope) {
@@ -30,4 +30,28 @@ module.controller('MainController', ['$scope', function($scope) {
 }]);
 ...
 
+```
+
+### Accordion
+
+```
+Accordion Attributes
+	close-others - set to true to only allow one accordion group open at a time. It defaults to true.
+
+Accordion Group Attributes
+	heading - set the title for the accordion group
+	is-open - whether the accordion group is opened or not
+```
+##### Example
+
+```html
+<bs5-accordion close-others="true">
+	<bs5-accordion-group is-open="false" heading="Heading Set With Heading Attribute">
+		... accordion group content ...
+	</bs5-accordion-group>
+	<bs5-accordion-group is-open="false">
+		<bs5-accordion-header>Heading Set With The Accordion Header Element</bs5-accordion-header>
+		... accordion group content ...
+	</bs5-accordion-group>
+</bs5-accordion>
 ```
