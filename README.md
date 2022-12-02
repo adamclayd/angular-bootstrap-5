@@ -344,8 +344,76 @@ Attributes
 <button type="button" class="btn btn-primary" bs5-popover="<h1>Test Popover</h1>" html="true" title="Popover">Popover</button>
 ```
 
+## Pageination
 
-# Todo Tasklist
+#### Directive: bs5Pagination
+
+```
+Attributes
+	align               - Horizontal alignment of the pagination element. Valid values are 'left', 'center', 'right', and null.
+	                      Default is null.
+	                      
+	current-page        - Meant to bind to a currentPage scope variable.
+	                      
+	display-pages-range - The number of pages to display at one time. Default is 5.
+	
+	first-page-text     - The first page link text. Default is 'First',
+	
+	last-page-text      - The last page link text. Default is 'Last'.
+	
+	next-page-text      - The next page link text. Default is 'Next'.
+	
+	number-items        - The total number of items.
+	
+	page-change         - Function that is executed when the page changes. $page and $pageSize are provided to pass to the function.
+	
+	page-size           - Number of items on each page. Default is 10.
+	
+	previous-page-text  - The previous page link text. Default is 'Previous'.
+	
+	size                - Bootstrap size of the pagination element. Valid values are 'sm' and 'lg'. Default is null.
+	
+	with-first-last     - Indicates whether or not to have the first page link and the last page link. Default is true.
+	 
+	with-previous-next  - Indicates whether or not to have the previous page link and the next page link. Default is true. 
+	
+```
+
+###### HTML File
+
+```html
+...
+
+<div ng-controller="MainController">
+	<bs5-pagination current-page="pager.page" page-size="pager.pageSize" number-items="pager.numItems" page-change="pageChange($page, $pageSize)"></bs5-pagination>
+</div>
+
+...
+```
+
+###### Javascript File
+
+```javascript
+...
+
+module.controller('MainController', ['$scope', function($scope) {
+	$scope.pager = {
+		page: 1,
+		pageSize: 25,
+		numItems: 1000,
+		items: []
+	};
+	
+	$scope.pageChange = function(page, pageSize) {
+		// get page from server
+		console.log('Current Page: ' + page);
+		console.log('Page Size: ' + pageSize);
+	};
+}]);
+...
+```
+
+## Todo Tasklist
 - [ ] Make pagination move the pages when you get to the last page in the list.
 - [ ] Make a way to return a result for html popovers. May need to put in a promise.
 - [ ] Add a datepicker.
