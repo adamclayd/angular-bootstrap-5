@@ -850,7 +850,11 @@
 					var end = null;
 					
 					if(!scope.pages.length) {
-						if(scope.currnetPage - pageRange < 1) {
+						if(pageRange + 1 >= scope.numberPages) {
+							start = 1;
+							end = scope.numberPages;
+						}
+						else if(scope.currnetPage - pageRange < 1) {
 							start = 1;
 							end = start + pageRange;
 						}
@@ -864,7 +868,11 @@
 						}
 					}
 					else {
-						if((scope.currentPage === scope.pages[scope.pages.length - 1] || scope.currentPage === scope.pages[scope.pages.length - 1] + 1) && scope.currentPage < scope.numberPages) {
+						if(pageRange + 1 >= scope.numberPages) {
+							start = 1;
+							end = scope.numberPages;
+						}
+						else if((scope.currentPage === scope.pages[scope.pages.length - 1] || scope.currentPage === scope.pages[scope.pages.length - 1] + 1) && scope.currentPage < scope.numberPages) {
 							start = scope.currentPage;
 							
 							if(start + pageRange >= scope.numberPages) {
@@ -900,7 +908,7 @@
 						start: start,
 						end: end
 					}
-				}
+				};
 				
 				
 				var pageRange = scope.$eval(attrs.displayPagesRange);
@@ -920,25 +928,44 @@
 				scope.pages = [];
 				
 				scope.$watch('numberItems', function(value, old) {
-					if(value !== old) 
-						scope.numberPages = Math.ceil(value / scope.pageSize);
+					if(value !== old) { 
+						scope.numberPages = Math.ceil(scope.numberItems / scope.pageSize);
+						
+						if(scope.currrentPage > scope.numberPages) {
+							scope.pages = [];
+							scope.currentPage = scope.numberPages;
+						}
+						else if(scope.pageChange) {
+							scope.pageChange({$page: scope.currentPage, $pageSize: scope.pageSize});
+						}
+					}
 				});
 				
 				scope.$watch('pageSize', function(value, old) {
-					if(value !== old)
-						scope.numberPages = Math.ceil(scope.numberItems / value);
+					if(value !== old) {
+						scope.numberPages = Math.ceil(scope.numberItems / scope.pageSize);
+						
+						
+						if(scope.currrentPage > scope.numberPages) {
+							scope.pages = [];
+							scope.currentPage = scope.numberPages;
+						}
+						else if(scope.pageChange) {
+							scope.pageChange({$page: scope.currentPage, $pageSize: scope.pageSize});
+						}
+					}
 				});
 				
 				scope.$watch('currentPage', function(value, old) {
 					if(value !== old) {
 						
-						if(scope.currentPage === scope.pages[0] || scope.currentPage === scope.pages[0] - 1 || scope.currentPage === scope.pages[scope.pages.length - 1] || scope.currentPage === scope.pages[scope.pages.length - 1] + 1 || scope.currentPage === 1 || scope.currentPage === scope.numberPages) {
+						if(scope.currentPage === scope.pages[0] || scope.currentPage === scope.pages[0] - 1 || scope.currentPage === scope.pages[scope.pages.length - 1] || scope.currentPage === scope.pages[scope.pages.length - 1] + 1 || scope.currentPage === 1 || scope.currentPage === scope.numberPages || !scope.pages.length) {
 							var r = getStartEndRange();
 							scope.pages = range(r.start, r.end);
 						}
 						
 						if(scope.pageChange)
-							scope.pageChange({$page: value, $pageSize: scope.pageSize});
+							scope.pageChange({$page: scope.currentPage, $pageSize: scope.pageSize});
 					}
 				});
 				
@@ -959,10 +986,10 @@
 			'angular/bootstrap5/templates/pagination/pagination.html',
 			'<nav>' +
 				'<ul class="pagination {{size === \'lg\' || size === \'sm\' ? \'pagination-\' + size : \'\'}}" ng-class="{\'justify-content-center\': align === \'center\', \'justify-content-end\': align === \'right\'}">' +
-					'<li class="page-item" ng-if="withFirstLast" ng-disabled="currentPage <= 1" ng-class="{disabled: currentPage <= 1}">' +
+					'<li class="page-item" ng-if="withFirstLast && numberPages > pageRange + 1" ng-disabled="currentPage <= 1" ng-class="{disabled: currentPage <= 1}">' +
 						'<a class="page-link" href="#" ng-click="changePage(1, $event)">{{firstPageText}}</a>' +
 					'</li>' +
-					'<li class="page-item" ng-if="withPreviousNext" ng-disabled="currentPage <= 1" ng-class="{disabled: currentPage <= 1}">' +
+					'<li class="page-item" ng-if="withPreviousNext && numberPages > pageRange + 1" ng-disabled="currentPage <= 1" ng-class="{disabled: currentPage <= 1}">' +
 						'<a class="page-link" href="#" ng-click="changePage(currentPage - 1, $event)">{{previousPageText}}</a>' +
 					'</li>' +
 					'<li class="page-item" ng-repeat-start="page in pages" ng-if="page !== currentPage"">' + 
@@ -971,10 +998,10 @@
 					'<li class="page-item active" ng-repeat-end ng-if="page === currentPage">' +
 						'<a class="page-link" href="#" ng-click="$event.preventDefault()">{{page}}</a>' +
 					'</li>' +
-					'<li class="page-item" ng-if="withPreviousNext" ng-disabled="currentPage >= numberPages" ng-class="{disabled: currentPage >= numberPages}">' +
+					'<li class="page-item" ng-if="withPreviousNext && numberPages > pageRange + 1" ng-disabled="currentPage >= numberPages" ng-class="{disabled: currentPage >= numberPages}">' +
 						'<a class="page-link" href="#" ng-click="changePage(currentPage + 1, $event)">{{nextPageText}}</a>' +
 					'</li>' +
-					'<li class="page-item" ng-if="withFirstLast" ng-disabled="currentPage >= numberPages" ng-class="{disabled: currentPage >= numberPages}">' +
+					'<li class="page-item" ng-if="withFirstLast && numberPages > pageRange + 1" ng-disabled="currentPage >= numberPages" ng-class="{disabled: currentPage >= numberPages}">' +
 						'<a class="page-link" href="#" ng-click="changePage(numberPages, $event)">{{lastPageText}}</a>"' +
 					'</li>' +
 				'</ul>' +
