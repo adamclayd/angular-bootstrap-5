@@ -288,7 +288,7 @@
 							});
 						}
 						else {
-							$animate.animate(elm.find('.progress-bar'), {width: old + '%'}, {width: value + '%'});
+							$animate.animate(angular.element(elm[0].querySelector('.progress-bar')), {width: old + '%'}, {width: value + '%'});
 						}
 					}
 					
