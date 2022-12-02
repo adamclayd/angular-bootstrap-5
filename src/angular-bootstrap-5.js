@@ -295,7 +295,7 @@
 							scope.value = 100;
 						
 						if($animateCss) {
-							$animateCss(eangular.element(elm[0].querySelector('.progress-bar')), {
+							$animateCss(angular.element(elm[0].querySelector('.progress-bar')), {
 								from: {width: old + '%'},
 								to: {width: value + '%'},
 								duration: 0.25
@@ -834,11 +834,8 @@
 		previousPageText: 'Previous',
 		nextPageText: 'Next',
 		lastPageText: 'Last',
-		skipForwardText: 'Skip',
-		skipBackwardText: 'Skip',
 		withFirstLast: true,
 		withPreviousNext: true,
-		withSkipBackwardForward: false,
 		size: null,
 		align: null
 	});
@@ -882,15 +879,12 @@
 				
 				scope.pageRange = pageRange;
 				scope.withFirstLast = attrs.withFirstLast === 'true' || attrs.withFirstLast === 'false' ? scope.$eval(attrs.withFirstLast) : bs5PaginationConfig.withFirstLast;
-				scope.withFirstLast = attrs.withPreviousNext === 'true' || attrs.withPreviousNext === 'false' ? scope.$eval(attrs.withPreviousNext) : bs5PaginationConfig.withPreviousNext;
-				scope.withSkipForwardBackward = attrs.withSkipBackwardForward === 'true' || attrs.withSkipBackwardForward === 'false' ? scope.$eval(attrs.withSkipBackwardForward) : bs5PaginationConfig.withSkipBackwardForward;
+				scope.withPreviousNext = attrs.withPreviousNext === 'true' || attrs.withPreviousNext === 'false' ? scope.$eval(attrs.withPreviousNext) : bs5PaginationConfig.withPreviousNext;
 				scope.pageSize = scope.pageSize || bs5PaginationConfig.pageSize;
 				scope.firstPageText = attrs.firstPageText || bs5PaginationConfig.firstPageText;
 				scope.previousPageText = attrs.previousPageText || bs5PaginationConfig.previousPageText;
 				scope.nextPageText = attrs.nextPageText || bs5PaginationConfig.nextPageText;
 				scope.lastPageText = attrs.lastPageText || bs5PaginationConfig.lastPageText;
-				scope.skipBackwardText = attrs.skipBackwardText || bs5PaginationConfig.skipBackwardText
-				scope.skipForwardText = attrs.skipForwardText || bs5PaginationConfig.skipForwardText;
 				scope.size = attrs.size || bs5PaginationConfig.size;
 				scope.align = attrs.align || bs5PaginationConfig.align;
 				scope.numberPages = Math.ceil(scope.numberItems / scope.pageSize);
@@ -960,9 +954,6 @@
 					'<li class="page-item" ng-if="withFirstLast" ng-disabled="currentPage <= 1" ng-class="{disabled: currentPage <= 1}">' +
 						'<a class="page-link" href="#" ng-click="changePage(1, $event)">{{firstPageText}}</a>' +
 					'</li>' +
-					'<li class="page-item" href="#" ng-disabled="currentPage - (pageRange + 1) < 1" ng-class="{disabled: currentPage - (pageRange + 1) < 1}" ng-if="withSkipBackwardForward">' +
-						'<a class="page-link" href="#" ng-click="changePage(currentPage - (pageRange + 1), $event)">{{skipBackwardText}}</a>' +
-					'</li>' +
 					'<li class="page-item" ng-if="withPreviousNext" ng-disabled="currentPage <= 1" ng-class="{disabled: currentPage <= 1}">' +
 						'<a class="page-link" href="#" ng-click="changePage(currentPage - 1, $event)">{{previousPageText}}</a>' +
 					'</li>' +
@@ -974,9 +965,6 @@
 					'</li>' +
 					'<li class="page-item" ng-if="withPreviousNext" ng-disabled="currentPage >= numberPages" ng-class="{disabled: currentPage >= numberPages}">' +
 						'<a class="page-link" href="#" ng-click="changePage(currentPage + 1, $event)">{{nextPageText}}</a>' +
-					'</li>' +
-					'<li class="page-item" ng-if="withSkipBackwardForward" ng-disabled="currentPage + (pageRange + 1) > numberPages" ng-class="{disabled: currentPage + (pageRange + 1) > numberPages}">' +
-						'<a class="page-link" href="#" ng-click="changePage(currnetPage + (pageRange + 1), $event)">{{skipforwardText}}</a>' +
 					'</li>' +
 					'<li class="page-item" ng-if="withFirstLast" ng-disabled="currentPage >= numberPages" ng-class="{disabled: currentPage >= numberPages}">' +
 						'<a class="page-link" href="#" ng-click="changePage(numberPages, $event)">{{lastPageText}}</a>"' +
