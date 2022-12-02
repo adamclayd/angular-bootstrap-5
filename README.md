@@ -333,7 +333,7 @@ Attributes
 	             Default is a blank string ('').
 	             
 	trigger    - The type of event that is used to trigger the popover. Valid values are
-	             'click', 'h'hover'and 'focus'. Default is 'click'.
+	             'click', 'hover', and 'focus'. Default is 'click'.
 	            
 	
 ```
