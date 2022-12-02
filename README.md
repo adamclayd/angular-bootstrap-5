@@ -279,7 +279,7 @@ Attributes
 	html        - If true then the tooltip can contain html. Default is false.
 	
 	load-cb     - A function callback that is called when the tooltip is created. The function
-	              defination is as follows function(scope).
+	              definition is as follows function(scope).
 	
 	offset      - Array [x, y] to offset the tooltip. Default is [0, 0].
 	
@@ -319,7 +319,7 @@ Attributes
 	html        - If true the html is allowed in the popover. Default is false.
 	
 	load-cb     - Function callback that is called each time the popover is created and shown.
-	              The function defination is as follows function(scope).
+	              The function definition is as follows function(scope).
 	
 	offset      - Place the popover [x, y] from the center. Default is [0, 0].
 	
