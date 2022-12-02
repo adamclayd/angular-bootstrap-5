@@ -14,7 +14,10 @@
 		'bs5.alert',
 		'bs5.progressbar',
 		'bs5.tabs',
-		'bs5.modal'
+		'bs5.modal',
+		'bs5.dropdown',
+		'bs5.tooltip',
+		'bs5.popover'
 	]);
 	
 	var templates = angular.module('bs5.templates', [
@@ -23,7 +26,8 @@
 		'angular/bootstrap5/templates/alert/alert.html',
 		'angular/bootstrap5/templates/progressbar/progressbar.html',
 		'angular/bootstrap5/templates/tabs/tabset.html',
-		'angular/bootstrap5/templates/tabs/tab.html'
+		'angular/bootstrap5/templates/tabs/tab.html',
+		'angular/bootstrap5/templates/dropdown/dropdown.html'
 	]);
 	
 	
@@ -510,7 +514,7 @@
 	
 	var modal = angular.module('bs5.modal', []);
 	
-	modal.service('$bs5Modal', ['$controller', '$compile', '$rootScope', '$q', '$document', '$http', function($controller, $compile, $rootScope, $q, $document, $http) {
+	modal.service('$bs5Modal', ['$templateCache', '$controller', '$compile', '$rootScope', '$q', '$document', '$http', function($templateCache, $controller, $compile, $rootScope, $q, $document, $http) {
 		return function(options) {
 			var defaults = {
 				backdrop: false,
@@ -530,7 +534,7 @@
 				$http({
 					method: 'GET',
 					url: options.templateUrl
-				}).then(function(r) { contentDeferred.resolve(r.data); });
+				}).then(function(r) { contentDeferred.resolve(r.data); }, function() { contentDeferred.resolve($templateCache.get(options.templateUrl)); });
 			}
 			else if(angular.isString(options.template)) {
 				contentDeferred.resolve(options.template);
@@ -592,8 +596,215 @@
 					if(modal)
 						modal.hide();
 				}
-			}
+			};
 		}
 	}]);
 	
+	var tooltip = angular.module('bs5.tooltip', []);
+	
+	tooltip.directive('bs5Tooltip', ['$templateCache', '$document', '$compile', '$http', '$q', function($templateCache, $document, $compile, $http, $q) {
+		function genId() {
+			var id = "bs5tooltip" + Math.floor((Math.random() * 100) + 1);
+			
+			if($document[0].querySelector('#' + id))
+				id = genId();
+				
+			return id;
+		};
+		
+		return {
+			restrict: 'A',
+			scope: {
+				onLoad: '=?loadCb'
+			},
+			link: function(scope, elm, attrs) {
+				var deferred = $q.defer();
+				var id = genId();
+				
+				var offset = attrs.offset ? scope.$eval(attrs.offset) : [0, 0];
+				var delay = attrs.delay ? scope.$eval(attrs.delay) : 0;
+				var animate = attrs.animate ? !!scope.$eval(attrs.animate) : true;
+				var html = attrs.html ? !!scope.$eval(attrs.html) : false;
+				
+				if(attrs.templateUrl) {
+					$http({
+						url: attrs.templateUrl,
+						method: 'GET'
+					}).then(function(r) {
+						var content = '<div id="' + id + '">' + r.data + '</div>';
+						deferred.resolve(content);
+					}, function() {
+						var content = '<div id="' + id + '">' + $templateCache.get(attrs.templateUrl) + '</div>';
+						deferred.resolve(content);
+					});
+				}
+				else {
+					var content = html ? '<div id="' + id + '">' + attrs.bs5Tooltip + '</div>' : attrs.bs5Tooltip;
+					deferred.resolve(content);
+				}
+				
+				deferred.promise.then(function(content) {
+					var tooltipScope = scope.$new();
+					var tooltip = new bootstrap.Tooltip(elm[0], {
+						container: attrs.container || 'body',
+						animation: animate,
+						html: !!attrs.templateUrl || html,
+						sanitize: !!!attrs.templateUrl || !html,
+						title: content,
+						placement: attrs.placement || 'top',
+						delay: angular.isNumber(delay) || angular.isObject(delay) ? delay : 0,
+						offset: angular.isArray(offset) ? offset : [0, 0],
+						trigger: 'manual'
+					});
+					
+					tooltipScope.params = {tooltip: tooltip};
+					
+					elm.on('shown.bs.tooltip', function() {
+						var element = $document[0].querySelector('#' + id);
+						
+						if(element) {
+							$compile(angular.element(element))(tooltipScope);
+						
+							if(angular.isFunction(scope.onLoad)) {
+								scope.$apply(function() {
+									scope.onLoad(tooltipScope);
+								});
+							}
+						}
+					});
+					
+					if(attrs.trigger === 'click') {
+						elm.on('click', function() {
+							tooltip.toggle();
+						});
+					}
+					else if(attrs.trigger === 'focus') {
+						elm.on('focus', function() {
+							tooltip.show();
+						});
+						
+						elm.on('blur', function() {
+							tooltip.hide();
+						});
+					}
+					else {
+						elm.on('mouseenter', function() {
+							tooltip.show();
+						});
+					
+						elm.on('mouseleave', function() {
+							tooltip.hide();
+						});
+					}
+				});
+			}
+		};
+	}]);
+	
+	var popover = angular.module('bs5.popover', []);
+	
+	popover.directive('bs5Popover', ['$templateCache', '$document', '$compile', '$http', '$q', function($templateCache, $document, $compile, $http, $q) {
+		function genId() {
+			var id = 'bs5popover' + Math.floor((Math.random() * 100) + 1);
+			
+			if($document[0].querySelector('#' + id))
+				id = genId();
+				
+			return id;
+		}
+		
+		return {
+			restrict: 'A',
+			scope: {
+				onLoad: '=?loadCb'
+			},
+			link: function(scope, elm, attrs) {
+				var deferred = $q.defer();
+				var id = genId();
+				
+				var animate = attrs.animate ? !!scope.$eval(attrs.animate) : true;
+				var container = attrs.container && $document[0].querySelector(attrs.container) ? attrs.container : 'body';
+				var delay = attrs.delay ? scope.$eval(attrs.delay) : 0;
+				var html = attrs.html ? !!scope.$eval(attrs.html) : false;
+				var placement = attrs.placement === 'left' || attrs.placement === 'top' || attrs.placement === 'bottom' ? attrs.placement : 'right';
+				var title = attrs.title || '';
+				var trigger = attrs.trigger === 'focus' || attrs.trigger === 'hover' ? attrs.trigger : 'click';
+				var offset = attrs.offset ? scope.$eval(attrs.offset) : [0, 0];
+				
+				if(attrs.templateUrl) {
+					$http({
+						url: attrs.templateUrl,
+						method: 'GET'
+					}).then(function(r) {
+						var content = '<div id="' + id + '">' + r.data + '</div>';
+						deferred.resolve(content);
+					}, function() {
+						var content = '<div id="' + id + '">' + $templateCache.get(attrs.templateUrl) + '</div>';
+						deferred.resolve(content);						
+					});
+				}
+				else {
+					var content = html ? '<div id="' + id + '">' + attrs.bs5Popover + '</div>' : attrs.bs5Popover;
+					deferred.resolve(content);
+				}
+				
+				deferred.promise.then(function(content) {
+					var popoverScope = scope.$new();
+					var popover = new bootstrap.Popover(elm[0], {
+						animation: animate,
+						container: container,
+						content: content,
+						delay: angular.isNumber(delay) || angular.isObject(delay) ? delay : 0,
+						html: !!attrs.templateUrl || html,
+						placement: placement,
+						title: title,
+						trigger: 'manual',
+						sanitize: !!!attrs.templateUrl || !html,
+						offset: angular.isArray(offset) ? offset : [0, 0]
+					});
+					
+					popoverScope.params = {popover: popover};
+					
+					elm.on('shown.bs.popover', function() {
+						var element = $document[0].querySelector('#' + id);
+						
+						if(element) {
+							$compile(angular.element(element))(popoverScope);
+							
+							if(angular.isFunction(scope.onLoad)) {
+								scope.$apply(function() {
+									scope.onLoad(popoverScope);
+								});
+							}
+						}
+					});
+					
+					
+					if(trigger === 'hover') {
+						elm.on('mouseenter', function() {
+							popover.show();
+						});
+						
+						elm.on('mouseleave', function() {
+							popover.hide();
+						});
+					}
+					else if(trigger === 'focus') {
+						elm.on('focus', function() {
+							popover.show();
+						});
+						
+						elm.on('blur', function() {
+							popover.hide();
+						});
+					}
+					else {
+						elm.on('click', function() {
+							popover.toggle();
+						});
+					}
+				});
+			}
+		};
+	}]);
 })();
