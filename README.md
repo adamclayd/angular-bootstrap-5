@@ -149,3 +149,97 @@ Tab Attributes
 	</bs5-tab>
 </bs5-tabset>
 ```
+
+## Modal
+
+#### $bs5Modal Service
+
+The `$bs5Modal` service opens a modal window and returns an object that contains result promise, a close function that
+resolves the result promise and closes the modal, and a dismiss function that simply closes the modal.
+
+```
+Options
+	backdrop     - If true it adds a backdrop. Default is false.
+	
+	size         - Bootstrap modal size. Valid values are 'sm', 'lg', 'xl', or null. Default is null.
+	
+	centered     - If true the modal is vertically centered. Default is false.
+	
+	scrollable   - If true the modal body is scrollable. Default is false.
+	
+	container    - A selector to the element that is to contain the modal. Default is 'body'.
+	
+	controller   - A string for a controller that is defined with module.controller or a function 
+	               that is a constructor for the controller. (optional)
+	               
+	controllerAs - A label for the controller. Requires controller option to be defined. (optional)
+	
+	templateUrl  - The url to the modal contend template.
+	
+	template     - Modal content template.
+	
+	If the 'templateUrl' is not defined then the 'template' option is required or an exception will be thrown.
+	
+Returns
+	{
+		result: promise        - A promise that can be resolved by interacting with the modal,
+		close:	function(data) - Closes the modal and resolves the result with the data parameter,
+		dismiss: function()    - Closes the modal.
+	}
+```
+
+###### HTML File
+```html
+...
+
+<div ng-controller="MainController">
+	<button type="button" class="btn btn-primary" ng-click="openModal()">Open Modal</button>
+</div>
+<script type="text/ng-template" id="modal-content.html">
+	<div class="modal-header">
+		<h5 class="modal-title">{{title}}</h5>
+	</div>
+	<div class="modal-body">
+		{{body}}
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-success" ng-clicck="resolve()">Resolve</div>
+		<button type="button" class="btn btn-danger" ng-clicck="close()">Close</div>
+	</div>
+</script>
+
+...
+```
+
+###### Javascript File
+```javascript
+...
+
+module.controller('MainController', ['$scope', $bs5Modal, function($scope, $bs5Modal) {
+	$scope.openModal = function() {
+		var modal = $bs5Modal({
+			templateUrl: 'modal-content.html',
+			controller: ['$scope', function(scope) {
+				scope.title = 'Test Modal';
+				scope.body = '<h1>Modal Content</h1>';
+				
+				var resolver = 'This is a test resolver'; 
+				
+				scope.resolve = function() {
+					modal.close(resolver);
+				};
+				
+				scope.close = function() {
+					modal.dismiss();
+				};
+			}]
+		});
+		
+		modal.result.then(function(data) {
+			alert(data); // should alert 'This is a test resolver'
+		});
+	};
+}]);
+
+....
+````

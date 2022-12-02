@@ -571,10 +571,10 @@
 				'</div>'
 			);
 			
-			$document.find(options.container).append(elm);
+			angular.element($document[0].querySelector(options.container)).append(elm);
 			$compile(elm)(windowScope);
 			
-			var content = elm.find('.modal-content');
+			var content = angular.element(elm[0].querySelector('.modal-content'));
 			
 			contentDeferred.promise.then(function(html) {
 				content.html(html);
