@@ -287,7 +287,7 @@ Attributes
 	             'bottom', and 'right'. Default is 'top'.
 	
 	templateUrl - The url to the html content that will be put in the tooltip. If defined then
-                   html option will be true.
+	              html option will be true.
                    
 	trigger     - The way the tooltip is triggered. Valid values are 'hover', 'focus', and 'click'.
 	              Default is 'hover'
