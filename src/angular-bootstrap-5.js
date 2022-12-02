@@ -845,13 +845,61 @@
 				return attrs.templateUrl || 'angular/bootstrap5/templates/pagination/pagination.html';
 			},
 			link: function(scope, elm, attrs) {
-				function getStartEndRange(r) {
-					var start = scope.currentPage - r > 1 ? scope.currentPage - r : 1;
-					var end = start + r < scope.numberPages ? start + r : scope.numberPages
+				function getStartEndRange() {
+					var start = null;
+					var end = null;
+					
+					if(!scope.pages.length) {
+						if(scope.currnetPage - pageRange < 1) {
+							start = 1;
+							end = start + pageRange;
+						}
+						else if (scope.currentPage + pageRange > scope.numberPages){
+							end = scope.numberPages;
+							start = end - pageRange;
+						}
+						else {
+							start = scope.currentPage;
+							end = start + pageRange;
+						}
+					}
+					else {
+						if((scope.currentPage === scope.pages[scope.pages.length - 1] || scope.currentPage === scope.pages[scope.pages.length - 1] + 1) && scope.currentPage < scope.numberPages) {
+							start = scope.currentPage;
+							
+							if(start + pageRange >= scope.numberPages) {
+								end = scope.numberPages;
+								start = end - pageRange;
+							}
+							else {
+								end = start + pageRange;
+							}
+						}
+						else if((scope.currentPage === scope.pages[0] || scope.currentPage === scope.pages[0] - 1) && scope.currentPage > 1) {
+							end = scope.currentPage;
+							
+							if(end - pageRange <= 1) {
+								start = 1;
+								end = start + pageRange;
+							}
+							else {
+								start = end - pageRange;
+							}
+						}
+						else if(scope.currentPage === 1) {
+							start = 1;
+							end = start + pageRange;
+						}
+						else if(scope.currentPage === scope.numberPages) {
+							end = scope.numberPages;
+							start = end - pageRange;
+						}
+					}
+					
 					return {
 						start: start,
 						end: end
-					};
+					}
 				}
 				
 				
@@ -872,41 +920,22 @@
 				scope.pages = [];
 				
 				scope.$watch('numberItems', function(value, old) {
-					if(value !== old) {
+					if(value !== old) 
 						scope.numberPages = Math.ceil(value / scope.pageSize);
-						
-						if(scope.currentPage > scope.numberPages) {
-							scope.currentPage = scope.numberPages;
-						}
-						
-						var r = getStartEndRange(pageRange);
-						scope.pages = range(r.start, r.end);
-						
-						if(scope.pageChange)
-							scope.pageChange({$page: scope.currentPage, $pageSize: scope.pageSize});
-					}
 				});
 				
 				scope.$watch('pageSize', function(value, old) {
-					if(value !== old) {
+					if(value !== old)
 						scope.numberPages = Math.ceil(scope.numberItems / value);
-						
-						if(scope.currentPage > scope.numberPages) {
-							scope.currentPage = scope.numberPages;
-						}
-						
-						var r = getStartEndRange(pageRange);
-						scope.pages = range(r.start, r.end);
-						
-						if(scope.pageChange)
-							scope.pageChange({$page: scope.currentPage, $pageSize: value});
-					}
 				});
 				
 				scope.$watch('currentPage', function(value, old) {
 					if(value !== old) {
-						var r = getStartEndRange(pageRange);
-						scope.pages = range(r.start, r.end);
+						
+						if(scope.currentPage === scope.pages[0] || scope.currentPage === scope.pages[0] - 1 || scope.currentPage === scope.pages[scope.pages.length - 1] || scope.currentPage === scope.pages[scope.pages.length - 1] + 1 || scope.currentPage === 1 || scope.currentPage === scope.numberPages) {
+							var r = getStartEndRange();
+							scope.pages = range(r.start, r.end);
+						}
 						
 						if(scope.pageChange)
 							scope.pageChange({$page: value, $pageSize: scope.pageSize});
@@ -919,9 +948,7 @@
 					scope.currentPage = page;
 				};
 				
-				var rng = getStartEndRange(pageRange);
-				
-				
+				var rng = getStartEndRange();
 				scope.pages = range(rng.start, rng.end);
 			}
 		};
