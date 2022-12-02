@@ -55,3 +55,19 @@ Accordion Group Attributes
 	</bs5-accordion-group>
 </bs5-accordion>
 ```
+
+
+## Alerts
+
+```
+Alert Attributes
+	type        - Bootstrap alert type. Valid values are 'primary', 'secondary', 'success', 
+	              'danger', 'warning', 'info', 'light', and 'dark'. Default is 'primary'
+	
+	dismissible - If true it adds a close button that removes the alert. Default is false
+```
+
+###### Example
+```html
+<bs5-alert type="danger" dismissible="true">Error Alert</bs5-alert>
+```
