@@ -148,3 +148,4 @@ Tab Attributes
 		... tab content ...
 	</bs5-tab>
 </bs5-tabset>
+```
