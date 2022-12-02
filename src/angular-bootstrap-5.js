@@ -15,9 +15,9 @@
 		'bs5.progressbar',
 		'bs5.tabs',
 		'bs5.modal',
-		'bs5.dropdown',
 		'bs5.tooltip',
-		'bs5.popover'
+		'bs5.popover',
+		'bs5.pagination'
 	]);
 	
 	var templates = angular.module('bs5.templates', [
@@ -27,7 +27,7 @@
 		'angular/bootstrap5/templates/progressbar/progressbar.html',
 		'angular/bootstrap5/templates/tabs/tabset.html',
 		'angular/bootstrap5/templates/tabs/tab.html',
-		'angular/bootstrap5/templates/dropdown/dropdown.html'
+		'angular/bootstrap5/templates/pagination/pagination.html'
 	]);
 	
 	
@@ -806,5 +806,166 @@
 				});
 			}
 		};
+	}]);
+	
+	var pagination = angular.module('bs5.pagination', []);
+	
+	pagination.constant('bs5PaginationConfig', {
+		pageSize: 10,
+		displayPagesRange: 5,
+		firstPageText: 'First',
+		previousPageText: 'Previous',
+		nextPageText: 'Next',
+		lastPageText: 'Last',
+		skipForwardText: 'Skip',
+		skipBackwardText: 'Skip',
+		withFirstLast: true,
+		withPreviousNext: true,
+		withSkipBackwardForward: false,
+		size: null,
+		align: null
+	});
+	
+	pagination.directive('bs5Pagination', ['bs5PaginationConfig', function(bs5PaginationConfig) {
+		function range(p, q) {
+			var ret = [];
+			if(p <= q) {
+				for(var i = p; i <= q; i++)
+					ret.push(i);	
+			}
+			
+			return ret;
+		}
+		
+		return {
+			restrict: 'E',
+			replace: true,
+			scope: {
+				pageChange: '&?',
+				currentPage: '=',
+				numberItems: '=',
+				pageSize: '=?',
+			},
+			templateUrl: function(elm, attrs) {
+				return attrs.templateUrl || 'angular/bootstrap5/templates/pagination/pagination.html';
+			},
+			link: function(scope, elm, attrs) {
+				function getStartEndRange(r) {
+					var start = scope.currentPage - r > 1 ? scope.currentPage - r : 1;
+					var end = start + r < scope.numberPages ? start + r : scope.numberPages
+					return {
+						start: start,
+						end: end
+					};
+				}
+				
+				
+				var pageRange = scope.$eval(attrs.displayPagesRange);
+				pageRange = (angular.isNumber(pageRange) ? pageRange : bs5PaginationConfig.displayPagesRange) - 1;
+				
+				scope.pageRange = pageRange;
+				scope.withFirstLast = attrs.withFirstLast === 'true' || attrs.withFirstLast === 'false' ? scope.$eval(attrs.withFirstLast) : bs5PaginationConfig.withFirstLast;
+				scope.withFirstLast = attrs.withPreviousNext === 'true' || attrs.withPreviousNext === 'false' ? scope.$eval(attrs.withPreviousNext) : bs5PaginationConfig.withPreviousNext;
+				scope.withSkipForwardBackward = attrs.withSkipBackwardForward === 'true' || attrs.withSkipBackwardForward === 'false' ? scope.$eval(attrs.withSkipBackwardForward) : bs5PaginationConfig.withSkipBackwardForward;
+				scope.pageSize = scope.pageSize || bs5PaginationConfig.pageSize;
+				scope.firstPageText = attrs.firstPageText || bs5PaginationConfig.firstPageText;
+				scope.previousPageText = attrs.previousPageText || bs5PaginationConfig.previousPageText;
+				scope.nextPageText = attrs.nextPageText || bs5PaginationConfig.nextPageText;
+				scope.lastPageText = attrs.lastPageText || bs5PaginationConfig.lastPageText;
+				scope.skipBackwardText = attrs.skipBackwardText || bs5PaginationConfig.skipBackwardText
+				scope.skipForwardText = attrs.skipForwardText || bs5PaginationConfig.skipForwardText;
+				scope.size = attrs.size || bs5PaginationConfig.size;
+				scope.align = attrs.align || bs5PaginationConfig.align;
+				scope.numberPages = Math.ceil(scope.numberItems / scope.pageSize);
+				scope.pages = [];
+				
+				scope.$watch('numberItems', function(value, old) {
+					if(value !== old) {
+						scope.numberPages = Math.ceil(value / scope.pageSize);
+						
+						if(scope.currentPage > scope.numberPages) {
+							scope.currentPage = scope.numberPages;
+						}
+						
+						var r = getStartEndRange(pageRange);
+						scope.pages = range(r.start, r.end);
+						
+						if(scope.pageChange)
+							scope.pageChange({$page: scope.currentPage, $pageSize: scope.pageSize});
+					}
+				});
+				
+				scope.$watch('pageSize', function(value, old) {
+					if(value !== old) {
+						scope.numberPages = Math.ceil(scope.numberItems / value);
+						
+						if(scope.currentPage > scope.numberPages) {
+							scope.currentPage = scope.numberPages;
+						}
+						
+						var r = getStartEndRange(pageRange);
+						scope.pages = range(r.start, r.end);
+						
+						if(scope.pageChange)
+							scope.pageChange({$page: scope.currentPage, $pageSize: value});
+					}
+				});
+				
+				scope.$watch('currentPage', function(value, old) {
+					if(value !== old) {
+						var r = getStartEndRange(pageRange);
+						scope.pages = range(r.start, r.end);
+						
+						if(scope.pageChange)
+							scope.pageChange({$page: value, $pageSize: scope.pageSize});
+					}
+				});
+				
+				scope.changePage = function(page, evt) {
+					evt.preventDefault();
+					
+					scope.currentPage = page;
+				};
+				
+				var rng = getStartEndRange(pageRange);
+				
+				
+				scope.pages = range(rng.start, rng.end);
+			}
+		};
+	}]);
+	
+	angular.module('angular/bootstrap5/templates/pagination/pagination.html', []).run(['$templateCache', function($templateCache) {
+		$templateCache.put(
+			'angular/bootstrap5/templates/pagination/pagination.html',
+			'<nav>' +
+				'<ul class="pagination {{size === \'lg\' || size === \'sm\' ? \'pagination-\' + size : \'\'}}" ng-class="{\'justify-content-center\': align === \'center\', \'justify-content-end\': align === \'right\'}">' +
+					'<li class="page-item" ng-if="withFirstLast" ng-disabled="currentPage <= 1" ng-class="{disabled: currentPage <= 1}">' +
+						'<a class="page-link" href="#" ng-click="changePage(1, $event)">{{firstPageText}}</a>' +
+					'</li>' +
+					'<li class="page-item" href="#" ng-disabled="currentPage - (pageRange + 1) < 1" ng-class="{disabled: currentPage - (pageRange + 1) < 1}" ng-if="withSkipBackwardForward">' +
+						'<a class="page-link" href="#" ng-click="changePage(currentPage - (pageRange + 1), $event)">{{skipBackwardText}}</a>' +
+					'</li>' +
+					'<li class="page-item" ng-if="withPreviousNext" ng-disabled="currentPage <= 1" ng-class="{disabled: currentPage <= 1}">' +
+						'<a class="page-link" href="#" ng-click="changePage(currentPage - 1, $event)">{{previousPageText}}</a>' +
+					'</li>' +
+					'<li class="page-item" ng-repeat-start="page in pages" ng-if="page !== currentPage"">' + 
+						'<a class="page-link" href="#" ng-click="changePage(page, $event)">{{page}}</a>' +
+					'</li>' + 
+					'<li class="page-item active" ng-repeat-end ng-if="page === currentPage">' +
+						'<a class="page-link" href="#" ng-click="$event.preventDefault()">{{page}}</a>' +
+					'</li>' +
+					'<li class="page-item" ng-if="withPreviousNext" ng-disabled="currentPage >= numberPages" ng-class="{disabled: currentPage >= numberPages}">' +
+						'<a class="page-link" href="#" ng-click="changePage(currentPage + 1, $event)">{{nextPageText}}</a>' +
+					'</li>' +
+					'<li class="page-item" ng-if="withSkipBackwardForward" ng-disabled="currentPage + (pageRange + 1) > numberPages" ng-class="{disabled: currentPage + (pageRange + 1) > numberPages}">' +
+						'<a class="page-link" href="#" ng-click="changePage(currnetPage + (pageRange + 1), $event)">{{skipforwardText}}</a>' +
+					'</li>' +
+					'<li class="page-item" ng-if="withFirstLast" ng-disabled="currentPage >= numberPages" ng-class="{disabled: currentPage >= numberPages}">' +
+						'<a class="page-link" href="#" ng-click="changePage(numberPages, $event)">{{lastPageText}}</a>"' +
+					'</li>' +
+				'</ul>' +
+			'</nav>'
+		)
 	}]);
 })();
