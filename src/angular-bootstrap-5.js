@@ -271,15 +271,25 @@
 			replace: true,
 			scope: {
 				value: '=',
-				displayPercent: '='
+				displayPercent: '=?'
 			},
 			templateUrl: function(elm, attrs) {
 				return attrs.templateUrl || 'angular/bootstrap5/templates/progressbar/progressbar.html';
 			},
 			link: function(scope, elm, attrs) {
+				if(scope.value < 0)
+					scope.value = 0;
+				else if(scope.value > 100)
+					scope.value = 100;
+				
 				var old = scope.value;
 				scope.$watch(scope.value, function(value) {
 					if(old !== value) {
+						if(value < 0)
+							scope.value = 0;
+						else if(value > 100)
+							scope.value = 100;
+						
 						if($animateCss) {
 							$animateCss(eangular.element(elm[0].querySelector('.progress-bar')), {
 								from: {width: old + '%'},
