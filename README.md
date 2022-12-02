@@ -104,7 +104,7 @@ Attributes
 
 <div ng-controller="MainController">
 	<bs5-progressbar value="progress" display-percent="true"></bs5-progressbar>
-	<button type="button" class="btn btn-primary" ng-click="setProgress()">Rondomize Progress</button>
+	<button type="button" class="btn btn-primary" ng-click="setProgress()">Randomize Progress</button>
 </div>
 
 ...
