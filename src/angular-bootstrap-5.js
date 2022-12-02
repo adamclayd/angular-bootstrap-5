@@ -281,7 +281,7 @@
 				scope.$watch(scope.value, function(value) {
 					if(old !== value) {
 						if($animateCss) {
-							$animateCss(elm.find('.progress-bar'), {
+							$animateCss(eangular.element(elm[0].querySelector('.progress-bar')), {
 								from: {width: old + '%'},
 								to: {width: value + '%'},
 								duration: 0.25
