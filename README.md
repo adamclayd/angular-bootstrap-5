@@ -234,7 +234,7 @@ Returns
 ```javascript
 ...
 
-module.controller('MainController', ['$scope', $bs5Modal, function($scope, $bs5Modal) {
+module.controller('MainController', ['$scope', '$bs5Modal', function($scope, $bs5Modal) {
 	$scope.openModal = function() {
 		var modal = $bs5Modal({
 			templateUrl: 'modal-content.html',
