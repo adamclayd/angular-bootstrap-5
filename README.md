@@ -71,3 +71,41 @@ Alert Attributes
 ```html
 <bs5-alert type="danger" dismissible="true">Error Alert</bs5-alert>
 ```
+
+
+## Progressbar
+
+```
+Progressbar Attributes
+	value           - The percent value to bind with
+	
+	display-percent - If true it will display the percentage in the middle of the 
+	                  progressbar. Default is false.
+```
+
+###### HTML File
+```html
+...
+
+<div ng-controller="MainController">
+	<bs5-progressbar value="progress" display-percent="true"></bs5-progressbar>
+	<button type="button" class="btn btn-primary" ng-click="setProgress()">Rondomize Progress</button>
+</div>
+
+...
+```
+
+###### Javascript File
+```javascript
+...
+
+module.controller('MainController', ['$scope', function($scope) {
+	$scope.setProgress = function() {
+		$scope.progress = Math.floor((Math.random() * 100) + 1);
+	};
+	
+	$scope.setProgress();
+}]);
+
+...
+```

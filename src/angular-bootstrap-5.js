@@ -302,7 +302,7 @@
 						}
 					}
 					
-					old = value;
+					old = scope.value;
 				});
 			}
 		}
