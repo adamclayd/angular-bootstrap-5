@@ -4,9 +4,8 @@
 Directives and services that work with Bootstrap 5. 
 It has been tested and works with Bootstrap v5.1.3.
 
-```You have to include the Bootstrap 5 javascript file before you include ngBootstrap5```
 
-
+You have to include the Bootstrap 5 javascript file before you include ngBootstrap5
 
 Include the ngBootstrap5 module in your main application module:
 
