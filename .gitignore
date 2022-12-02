@@ -1,2 +1,5 @@
 .ptp-sync
-*/ptp-sync-folder
+*/.ptp-sync-folder
+*/*/.ptp-sync-folder
+*/*/*/.ptp-sync-folder
+*swp
