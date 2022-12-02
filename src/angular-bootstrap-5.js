@@ -631,9 +631,6 @@
 		
 		return {
 			restrict: 'A',
-			scope: {
-				onLoad: '=?loadCb'
-			},
 			link: function(scope, elm, attrs) {
 				var deferred = $q.defer();
 				var id = genId();
@@ -672,22 +669,6 @@
 						delay: angular.isNumber(delay) || angular.isObject(delay) ? delay : 0,
 						offset: angular.isArray(offset) ? offset : [0, 0],
 						trigger: 'manual'
-					});
-					
-					tooltipScope.params = {tooltip: tooltip};
-					
-					elm.on('shown.bs.tooltip', function() {
-						var element = $document[0].querySelector('#' + id);
-						
-						if(element) {
-							$compile(angular.element(element))(tooltipScope);
-						
-							if(angular.isFunction(scope.onLoad)) {
-								scope.$apply(function() {
-									scope.onLoad(tooltipScope);
-								});
-							}
-						}
 					});
 					
 					if(attrs.trigger === 'click') {
