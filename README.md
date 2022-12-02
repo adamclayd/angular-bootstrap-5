@@ -336,7 +336,7 @@ Attributes
 	
 	offset      - Place the popover [x, y] from the center. Default is [0, 0].
 	
-	placement  - Where to place the popover around the element. Valid values are
+	placement   - Where to place the popover around the element. Valid values are
 	              'top', 'left', 'bottom', and 'right'. Default is 'right'.
 	            
 	templateUrl - The url of the html template to use for the popover cocontent
