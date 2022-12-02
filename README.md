@@ -298,7 +298,48 @@ Attributes
 <button type="button" class="btn btn-primary" bs5-tooltip="<strong>Test Tooltip</strong>" html="true">Tooltip</button>
 ```
 
+## Popover
 
+#### Directive: bs5Popover
+
+```
+Attributes
+	animate       - If true then the popover will do fade in and out animation.
+	                Default is true.
+	                
+	bs5-popover   - Content to use for the popover if templateUrl is not defined.
+	          
+	container    - A string selector to the element that the popover will append to.
+	                Default is 'body'.
+	            
+	delay        - A number or an object with show and hide properties that indicates
+	               the time that the popover should wait before it is shown or hidden.
+	               Default is 0.
+	
+	html        - If true the html is allowed in the popover. Default is false.
+	
+	load-cb     - Function callback that is called each time the popover is created and shown.
+	              The function defination is as follows function(scope).
+	
+	offset      - Place the popover [x, y] from the center. Default is [0, 0].
+	
+	placement  - Where to place the popover around the element. Valid values are
+	              'top', 'left', 'bottom', and 'right'. Default is 'right'.
+	            
+	templateUrl - The url of the html template to use for the popover cocontent
+	              Option html is true if this option is set
+	            
+	title      - The title of the popover that is displayed in the header of the popover.
+	             Default is a blank string ('').
+	            
+	
+```
+
+###### Example
+
+```html
+<button type="button" class="btn btn-primary" bs5-popover="<h1>Test Popover</h1>" html="true" title="Popover">Popover</button>
+```
 
 
 # Todo Tasklist
