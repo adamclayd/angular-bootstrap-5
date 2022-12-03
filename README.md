@@ -163,15 +163,15 @@ Attributes
 #### Directive: bs5Tab
 ```
 Attributes
-	heading  - The tab heading.
+	heading                     - The tab heading.
 	
-	select   - The function to execute after the tab has been selected. $tabIndex and
-	           $event can be passed to the function. 
+	select($tabIndex, $event)   - The function to execute after the tab has been selected. $tabIndex and
+	                              $event can be passed to the function. 
 	
-	deselect - The function to execute after the tab has been deselected. $tabIndex and
-	           $event can be passed to the function.
+	deselect($tabIndex, $event) - The function to execute after the tab has been deselected. $tabIndex and
+	                              $event can be passed to the function.
 	           
-	disabled - If true the tab will be disabled. It won't be selectable. Default is false.
+	disabled                    - If true the tab will be disabled. It won't be selectable. Default is false.
 ```
 
 ###### Example
@@ -319,37 +319,37 @@ Attributes
 
 ```
 Attributes
-	animate       - If true then the popover will do fade in and out animation.
-	                Default is true.
+	animate                 - If true then the popover will do fade in and out animation.
+	                          Default is true.
 	                
-	bs5-popover   - Content to use for the popover if templateUrl is not defined.
+	bs5-popover             - Content to use for the popover if templateUrl is not defined.
 	          
-	container    - A string selector to the element that the popover will append to.
-	                Default is 'body'.
+	container               - A string selector to the element that the popover will append to.
+	                          Default is 'body'.
 	            
-	delay        - A number or an object with show and hide properties that indicates
-	               the time that the popover should wait before it is shown or hidden.
-	               Default is 0.
+	delay                   - A number or an object with show and hide properties that indicates
+	                          the time that the popover should wait before it is shown or hidden.
+	                          Default is 0.
 	
-	html        - If true the html is allowed in the popover. Default is false.
+	html                   - If true the html is allowed in the popover. Default is false.
 	
-	load        - Function that is executed each time the popover is created and shown.
-	              it provides $scope and $popover as passable parameters where $scope is the
-	              scope of the popover and $popover is the bootstrap.Popover object for the element.
+	load($scope, $popover) - Function that is executed each time the popover is created and shown.
+	                         it provides $scope and $popover as passable parameters where $scope is the
+	                         scope of the popover and $popover is the bootstrap.Popover object for the element.
 	
-	offset      - Place the popover [x, y] from the center. Default is [0, 0].
+	offset                 - Place the popover [x, y] from the center. Default is [0, 0].
 	
-	placement   - Where to place the popover around the element. Valid values are
-	              'top', 'left', 'bottom', and 'right'. Default is 'right'.
+	placement              - Where to place the popover around the element. Valid values are
+	                         'top', 'left', 'bottom', and 'right'. Default is 'right'.
 	            
-	templateUrl - The url of the html template to use for the popover cocontent
-	              Option html is true if this option is set
+	templateUrl            - The url of the html template to use for the popover cocontent
+	                         Option html is true if this option is set
 	            
-	title      - The title of the popover that is displayed in the header of the popover.
-	             Default is a blank string ('').
+	title                   - The title of the popover that is displayed in the header of the popover.
+	                          Default is a blank string ('').
 	             
-	trigger    - The type of event that is used to trigger the popover. Valid values are
-	             'click', 'hover', and 'focus'. Default is 'click'.
+	trigger                 - The type of event that is used to trigger the popover. Valid values are
+	                          'click', 'hover', and 'focus'. Default is 'click'.
 	            
 	
 ```
@@ -366,32 +366,32 @@ Attributes
 
 ```
 Attributes
-	align               - Horizontal alignment of the pagination element. Valid values are 'left', 'center', 'right', and null.
-	                      Default is null.
+	align                         - Horizontal alignment of the pagination element. Valid values are 'left', 'center', 'right', and null.
+	                                Default is null.
 	                      
-	current-page        - Meant to bind to a currentPage scope variable.
+	current-page                  - Meant to bind to a currentPage scope variable.
 	                      
-	display-pages-range - The number of pages to display at one time. Default is 5.
+	display-pages-range           - The number of pages to display at one time. Default is 5.
 	
-	first-page-text     - The first page link text. Default is 'First',
+	first-page-text               - The first page link text. Default is 'First',
 	
-	last-page-text      - The last page link text. Default is 'Last'.
+	last-page-text                - The last page link text. Default is 'Last'.
 	
-	next-page-text      - The next page link text. Default is 'Next'.
+	next-page-text                - The next page link text. Default is 'Next'.
 	
-	number-items        - The total number of items.
+	number-items                  - The total number of items.
 	
-	page-change         - Function that is executed when the page changes. $page and $pageSize are provided to pass to the function.
+	page-change($page, $pageSize) - Function that is executed when the page changes. $page and $pageSize are provided to pass to the function.
 	
-	page-size           - Number of items on each page. Default is 10.
+	page-size                     - Number of items on each page. Default is 10.
 	
-	previous-page-text  - The previous page link text. Default is 'Previous'.
+	previous-page-text            - The previous page link text. Default is 'Previous'.
 	
-	size                - Bootstrap size of the pagination element. Valid values are 'sm' and 'lg'. Default is null.
+	size                          - Bootstrap size of the pagination element. Valid values are 'sm' and 'lg'. Default is null.
 	
-	with-first-last     - Indicates whether or not to have the first page link and the last page link. Default is true.
+	with-first-last               - Indicates whether or not to have the first page link and the last page link. Default is true.
 	 
-	with-previous-next  - Indicates whether or not to have the previous page link and the next page link. Default is true. 
+	with-previous-next            - Indicates whether or not to have the previous page link and the next page link. Default is true. 
 	
 ```
 
