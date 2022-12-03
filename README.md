@@ -429,6 +429,41 @@ module.controller('MainController', ['$scope', function($scope) {
 ...
 ```
 
+## Datepicker
+
+#### Directive: bs5Datepicker
+
+```
+Requires
+	ngModel
+
+Attributes
+	format - The format to put the date in after selected. Defaults to 'mm/dd/yyyy'.
+```
+
+###### HTML File
+```html
+...
+
+<div ng-controller="MainController">
+	<input ng-model="model" bs5-datepicker format="mm/dd/yyyy" />
+</div>
+
+...
+```
+
+###### Javascript File
+
+```javascript
+...
+
+module.controller('MainController', ['$scope', function($scope) {
+	$scope.model = null;
+});
+
+...
+```
+
 ## Todo Tasklist
 - [x] Make pagination move the pages when you get to the last page in the list
 - [x] Make pagination work if the number of pages gets changed and fix the problem where there 

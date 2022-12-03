@@ -1016,7 +1016,7 @@
 				
 				var format = attrs.format || 'mm/dd/yyyy';
 				scope.$watch('date', function(value, old) {
-					if(value !== old) {
+					if(value && value !== old) {
 						var month = scope.date.getMonth();
 						month = month < 10 ? '0' + month : month;
 						
