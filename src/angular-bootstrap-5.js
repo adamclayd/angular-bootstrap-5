@@ -27,7 +27,8 @@
 		'angular/bootstrap5/templates/progressbar/progressbar.html',
 		'angular/bootstrap5/templates/tabs/tabset.html',
 		'angular/bootstrap5/templates/tabs/tab.html',
-		'angular/bootstrap5/templates/pagination/pagination.html'
+		'angular/bootstrap5/templates/pagination/pagination.html',
+		'angular/bootstrap5/templates/datepicker/calendar.html'
 	]);
 	
 	
@@ -74,19 +75,6 @@
 			}
 		}
 	}]);
-	
-	var tabindex = angular.module('bs5.tabindex', []);
-	
-	tabindex.directive('bs5TabindexToggle', function() {
-		return {
-			restrict: 'A',
-			link: function(scope, elm, attrs) {
-				attrs.$observe('disabled', function(disabled) {
-					attrs.$set('tabindex', disabled ? -1 : null);
-				});
-			}
-		};
-	})
 	
 	
 	var accordion = angular.module('bs5.accordion', ['bs5.collapse'])
@@ -658,7 +646,6 @@
 				}
 				
 				deferred.promise.then(function(content) {
-					var tooltipScope = scope.$new();
 					var tooltip = new bootstrap.Tooltip(elm[0], {
 						container: attrs.container || 'body',
 						animation: animate,
@@ -768,9 +755,7 @@
 							$compile(angular.element(element))(popoverScope);
 							
 							if(angular.isFunction(scope.onLoad)) {
-								scope.$apply(function() {
-									scope.onLoad({$scope: popoverScope, $popover: popover});
-								});
+								scope.onLoad({$scope: popoverScope, $popover: popover});
 							}
 						}
 					});
@@ -1005,5 +990,289 @@
 				'</ul>' +
 			'</nav>'
 		)
+	}]);
+	
+	var datepicker = angular.module('bs5.datepicker', []);
+	
+	datepicker.directive('bs5Datepicker', ['$complie', '$document', function($compile, $document) {
+		return {
+			restrict: 'A',
+			require: 'ngModel',
+			link: function(scope, elm, attrs, ctrl) {
+				function offset() {
+  					try {return elm.offset();} catch(e) {}
+  					var rawDom = elm[0];
+  					var _x = 0;
+  					var _y = 0;
+  					var body = document.documentElement || document.body;
+  					var scrollX = window.pageXOffset || body.scrollLeft;
+  					var scrollY = window.pageYOffset || body.scrollTop;
+  					_x = rawDom.getBoundingClientRect().left + scrollX;
+  					_y = rawDom.getBoundingClientRect().top + scrollY;
+  					return { left: _x, top: _y };
+				}
+
+				scope.date = null;
+				
+				var format = attrs.format || 'mm/dd/yyyy';
+				scope.$watch('date', function(value, old) {
+					if(value !== old) {
+						var month = scope.date.getMonth();
+						month = month < 10 ? '0' + month : month;
+						
+						var day = scope.date.getDate();
+						day = day < 10 ? '0' + day : day;
+						
+						var year = scope.date.getFullYear();
+						
+						var val = format.replace('mm', month).replace('dd', day).replace('yyyy', year);
+						
+						ctrl.$setViewValue(val);
+					}
+				});
+				
+				var off = offset();
+				scope.offset = {
+					top: off.top, 
+					left: off.left, 
+					bottom: off.top + elm[0].offsetHeight,
+					right: off.left + elm[0].offsetWidth
+				};
+				
+				scope.triggered = false;
+				elm.on('focus', function() {
+					if(!scope.triggered) {
+						if(ctrl.$modelValue) {
+							var date = new Date(ctrl.$modelValue);
+							
+							if(!isNaN(date.getDate()))
+								scope.date = date;
+							else
+								scope.date = null;
+						}
+						else {
+							scope.date = null
+						}
+						
+						var cal = angular.element('<bs5-calendar date="date" offset="offset" triggered="triggered"></bs5-calendar>');
+						$document.find('body').append(cal);
+				
+						$compile(cal)(scope);
+						
+						scope.triggered = true;
+					}
+				});
+				
+			}
+		}
+	}]);
+	
+	datepicker.constant('bs5MonthNames', [
+		"January",
+		"February",
+		"March",
+		"April",
+		"May",
+		"June",
+		"July",
+		"August",
+		"September",
+		"October",
+		"November",
+		"December"
+	]);
+	
+	datepicker.directive('bs5Calendar', ['$animate', '$injector', 'bs5MonthNames', function($animate, $injector, bs5MonthNames) {
+		var $animateCss = $injector.has('$animateCss') ? $injector.get('$animateCss') : null;
+		
+		return {
+			restrict: 'E',
+			replace: true,
+			scope: {
+				date: '=',
+				offset: '=',
+				triggeed: '='
+			},
+			templateUrl: function(elm, attrs) {
+				return attrs.templateUrl || 'angular/bootstrap5/templates/datepicker/calendar.html';
+			},
+			link: function(scope, elm, attrs) {
+				var ref = null;
+				var init = function() {
+					scope.calendar = [];
+				
+					for(var i = 0; i < 5; i++) {
+						var row = [];
+					
+						for(var j = 0; j < 7; j++) {
+							row.push({
+								number: null,
+								selected: false,
+								date: null
+							});
+						}
+					
+						scope.calendar.push(row);
+					}
+					
+					if(scope.date && !ref)
+						ref = angular.copy(scope.date);
+					else if(!ref)
+						ref = new Date();
+					
+					var month = ref.getMonth();
+					var day = 1;
+					
+					var brake = false;
+					
+					for(var i = 0; i < scope.calendar.length && day <= 31; i++) {
+						for(var j = ref.getDay(); j < scope.calendar[i].length && day <= 31 && !brake; j++) {
+							ref.setDate(day);
+							ref.setHours(0, 0, 0, 0);
+							calendar[i][j].number = day;
+							calendar[i][j].date = angular.copy(ref);
+							calendar[i][j].selected = scope.date && scope.date.getTime() === calendar[i][j].date.gettime();
+							day++;
+							
+							if(ref.getMonth() !== month)
+								brake = true;
+						}
+					}
+					
+					ref.setDate(1);
+					ref.setMonth(month);
+					ref.setHours(0, 0, 0, 0);
+					
+					scope.month = bs5MonthNames[month];
+					scope.year = ref.getFullYear();
+				};
+				
+				if($animateCss) {
+					$animateCss(elm, {
+						from: {opacity: 0},
+						to: {opacity: 1},
+						duration: 0.25
+					}).finally(init);
+				}
+				else {
+					$animate.animate(elm, {opacity: 0}, {opacity: 1}).finally(init);
+				}
+				
+				scope.close = function() {
+					if($animateCss) {
+						$animateCss(elm, {
+							from: {opacity: 1},
+							to: {opacity: 0},
+							duration: 0.25
+						}).finally(function() {
+							scope.triggered = false;
+							elm.remove();
+						});
+					}
+					else {
+						$animate.animate(elm, {opacity: 1}, {opacity: 0}).finally(function() {
+							scope.triggered = false;
+							elm.remove();
+						});
+					}
+				};
+				
+				scope.previousMonth = function() {
+					var month = ref.getMonth();
+					var year = ref.getFullYear();
+					
+					ref.setDate(1);
+					ref.setHours(0, 0, 0, 0);
+					if(month === 0) {
+						ref.setMonth(11);
+						ref.setYear(year - 1);
+						
+					}
+					else {
+						ref.setMonth(month - 1);
+					}
+					
+					init();
+				};
+				
+				scope.nextMonth = function() {
+					var month = ref.getMonth();
+					var year = ref.getFullYear();
+					
+					ref.setDate(1);
+					ref.setHours(0, 0, 0, 0);
+					
+					if(month === 11) {
+						ref.setMonth(0);
+						ref.setYear(year + 1);
+					}
+					else {
+						ref.setMonth(month + 1);
+					}
+					
+					init();
+				};
+				
+				scope.selectCell = function(cell) {
+					cell.selected = true;
+					scope.date = cell.date;
+					for(var i = 0; i < scope.calendar.length; i++) {
+						for(var j = 0; j < scope.calendar[i].length; j++) {
+							if(scope.calendar[i][j] !== cell) {
+								scope.calendar[i][j].selected = false;
+							}
+						}
+					}
+					
+					scope.close();
+				}
+			}
+		};
+	}]);
+	
+	angular.module('angular/bootstrap5/templates/datepicker/calendar.html', []).run(['$templateCache', function($templateCache) {
+		$templateCache.put(
+			'angular/bootstrap5/templates/datepicker/calendar.html',
+			'<div class="card" style="width: 350px; position: absolute; right: {{offset.right}}px; top: {{offset.bottom}}px; opacity: 0; border: 1px solid black;">' +
+				'<div class="card-body">' +
+					'<div class="row">' +
+						'<div class="col-12">' +
+							'<p class="text-end"><button type="button" class="btn-close" ng-click="close()"></button></p>' +
+						'</div>' +
+					'</div>' +
+					'<div class="row">' +
+						'<div class="col-2">' +
+							'<button type="button" class="btn btn-light" ng-click="previousMonth()" style="width: 100%">&lt;</button>' +
+						'</div>' +
+						'<div class="col-8">' +
+							'<p class="text-center">{{month}} {{year}}</p>' +
+						'</div>' +
+						'<div class="col-2">' +
+							'<button type="button" class="btn btn-light" style="width: 100%;" ng-click="nextMonth()">&gt;</button>' +
+						'</div>' +
+					'</div>' +
+					'<div class="row">' +
+						'<div class="col-12">' +
+							'<table class="table">' +
+								'<tbody>' +
+									'<tr>' +
+										'<td><strong>Sunday</strong></td>' +
+										'<td><strong>Monday</strong></td>' +
+										'<td><strong>Tuesday</strong></td>' +
+										'<td><strong>Wednesday</strong></td>' +
+										'<td><strong>Thursday</strong></td>' +
+										'<td><strong>Friday</strong></td>' +
+										'<td><strong>Saturday</strong></td>' +
+									'</tr>' +
+									'<tr ng-repeat="row in calendar">' +
+										'<td ng-repeat="cell in row"><button class="btn" ng-class="{\'btn-light\': !cell.selected, \'btn-primary\': cell.selected, disabled: !cell.date} ng-disabled="!cell.date" ng-click="selectCell(cell)" style="width: 100%">{{cell.number}}</button>' +
+									'</tr>' +
+								'</tbody>' +
+							'</table>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>'
+		);
 	}]);
 })();

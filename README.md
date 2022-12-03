@@ -433,4 +433,5 @@ module.controller('MainController', ['$scope', function($scope) {
 - [x] Make pagination move the pages when you get to the last page in the list
 - [x] Make pagination work if the number of pages gets changed and fix the problem where there 
       is only one list of pages.
-- [ ] Add a datepicker.
+- [x] Add a datepicker.
+- [ ] Test and fix any bugs that popup on the datepicker
