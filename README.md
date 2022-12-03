@@ -429,7 +429,7 @@ module.controller('MainController', ['$scope', function($scope) {
 ...
 ```
 
-## Datepicker
+## Datepicker (Untested)
 
 #### Directive: bs5Datepicker
 
