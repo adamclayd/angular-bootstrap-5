@@ -19,7 +19,7 @@ Include the ngBootstrap5 module in your main application module:
 var module = angular.module('app', ['ngBootstrap5']);
 ```
 
-You may want to include ngAnimate too because there are a few modules that can use it as opposed to the animation functionality
+You may want to include `ngAnimate` too because there are a few modules that can use it as opposed to the animation functionality
 thats comes with AngularJS.
 
 ## Collapse
