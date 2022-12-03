@@ -459,7 +459,53 @@ Attributes
 
 module.controller('MainController', ['$scope', function($scope) {
 	$scope.model = null;
-});
+}]);
+
+...
+```
+
+## Rating
+
+Provides a star rating widget.
+The `bootstrap-icons` css file is required for this feature to work correctly.
+
+#### Directive: bs5Rating
+
+```
+Requires
+	ngModel
+
+Attributes
+	enable-reset - Allows the model to be set to 0 when the user clicks on the same rating. Default is true.
+	
+	max          - The max rating value. Default is 5.
+	
+	readonly     - Binding that when true the user cannot edit the rating. Default is false.
+	
+	stateOnIcon  - The icon class that is filled in. Default is 'bi-star-fill'.
+	
+	stateOffIcon - The icon class that is not filled in. Default is 'bi-star'.
+```
+
+###### HTML File
+
+```html
+...
+
+<div ng-controller="MainController" >
+	<span bs5-rating ng-model="model" max="10"></span>
+</div>
+...
+```
+
+###### Javascript File
+
+```javascript
+...
+
+module.controller('MainController', ['$scope', function($scope) {
+	$scope.model = 7;
+}]);
 
 ...
 ```

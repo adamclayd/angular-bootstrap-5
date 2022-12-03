@@ -18,7 +18,8 @@
 		'bs5.tooltip',
 		'bs5.popover',
 		'bs5.pagination',
-		'bs5.datepicker'
+		'bs5.datepicker',
+		'bs5.rating'
 	]);
 	
 	var templates = angular.module('bs5.templates', [
@@ -29,7 +30,8 @@
 		'angular/bootstrap5/templates/tabs/tabset.html',
 		'angular/bootstrap5/templates/tabs/tab.html',
 		'angular/bootstrap5/templates/pagination/pagination.html',
-		'angular/bootstrap5/templates/datepicker/calendar.html'
+		'angular/bootstrap5/templates/datepicker/calendar.html',
+		'angular/bootstrap5/templates/rating/rating.html'
 	]);
 	
 	
@@ -1087,9 +1089,7 @@
 				offset: '=',
 				triggered: '='
 			},
-			templateUrl: function(elm, attrs) {
-				return attrs.templateUrl || 'angular/bootstrap5/templates/datepicker/calendar.html';
-			},
+			templateUrl: 'angular/bootstrap5/templates/datepicker/calendar.html',
 			link: function(scope, elm, attrs) {
 				
 				var ref = null;
@@ -1275,6 +1275,72 @@
 					'</div>' +
 				'</div>' +
 			'</div>'
+		);
+	}]);
+	
+	var rating = angular.module('bs5.rating', []);
+		
+	rating.directive('bs5Rating', function() {
+		return {
+			restrict: 'A',
+			require: 'ngModel',
+			scope: {
+				readonly: '=?'
+			},
+			templateUrl: function(elm, attrs) {
+				return attrs.templateurl || 'angular/bootstrap5/templates/rating/rating.html'
+			},
+			link: function(scope, elm, attrs, ctrl) {
+				var max = scope.$eval(attrs.max) || 5;
+				var enableReset = angular.isDefined(attrs.enableReset) ? scope.$eval(attrs.enableReset) : true;
+					
+				if(ctrl.$modelValue > max) {
+					ctrl.$setViewValue(max);
+					scope.value = max;
+				}
+				else {
+					scope.value = ctrl.$modelValue;
+				}
+					
+				scope.stateOnIcon = attrs.stateOnIcon || 'bi-star-fill';
+				scope.stateOffIcon = attrs.stateOffIcon || 'bi-star';
+					
+				scope.range = [];
+					
+				for(var i = 0; i < max; i++)
+					scope.range.push(i);
+						
+				scope.enter = function(value) {
+					if(!scope.readonly)
+						scope.value = value;
+				}
+					
+				scope.leave = function() {
+					if(!scope.readonly)
+						scope.value = ctrl.$modelValue;
+				}
+					
+				scope.rate = function(value) {
+					if(!scope.readonly) {
+						if(ctrl.$modelValue === value && enableReset) {
+							scope.value = 0;
+							ctrl.$setViewValue(0);
+						}
+						else {
+							scope.value = value;
+							ctrl.$setViewValue(value);
+						}
+					}
+				}
+					
+			}
+		};
+	});
+		
+	angular.module('angular/bootstrap5/templates/rating/rating.html', []).run(['$templateCache', function($templateCache) {
+		$templateCache.put(
+			'angular/bootstrap5/templates/rating/rating.html',
+			'<i class="bi {{$index < value ? stateOnIcon : stateOffIcon}}" ng-repeat="r in range" ng-mouseenter="enter($index + 1)" ng-click="rate($index + 1)" ng-mouseleave="leave()"></i>'
 		);
 	}]);
 })();
