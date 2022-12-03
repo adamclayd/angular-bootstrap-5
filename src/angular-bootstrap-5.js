@@ -17,7 +17,8 @@
 		'bs5.modal',
 		'bs5.tooltip',
 		'bs5.popover',
-		'bs5.pagination'
+		'bs5.pagination',
+		'bs5.datepicker'
 	]);
 	
 	var templates = angular.module('bs5.templates', [
@@ -994,74 +995,67 @@
 	
 	var datepicker = angular.module('bs5.datepicker', []);
 	
-	datepicker.directive('bs5Datepicker', ['$complie', '$document', function($compile, $document) {
+	datepicker.directive('bs5Datepicker', ['$compile', '$document', '$timeout', function($compile, $document, $timeout) {
 		return {
 			restrict: 'A',
-			require: 'ngModel',
+			require: '^ngModel',
 			link: function(scope, elm, attrs, ctrl) {
-				function offset() {
-  					try {return elm.offset();} catch(e) {}
-  					var rawDom = elm[0];
-  					var _x = 0;
-  					var _y = 0;
-  					var body = document.documentElement || document.body;
-  					var scrollX = window.pageXOffset || body.scrollLeft;
-  					var scrollY = window.pageYOffset || body.scrollTop;
-  					_x = rawDom.getBoundingClientRect().left + scrollX;
-  					_y = rawDom.getBoundingClientRect().top + scrollY;
-  					return { left: _x, top: _y };
+				function offset() {  					
+  					var rect = elm[0].getBoundingClientRect(),
+					scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
+					scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+					return { top: rect.top + scrollTop, left: rect.left + scrollLeft };
 				}
-
-				scope.date = null;
 				
-				var format = attrs.format || 'mm/dd/yyyy';
-				scope.$watch('date', function(value, old) {
-					if(value && value !== old) {
-						var month = scope.date.getMonth();
-						month = month < 10 ? '0' + month : month;
-						
-						var day = scope.date.getDate();
-						day = day < 10 ? '0' + day : day;
-						
-						var year = scope.date.getFullYear();
-						
-						var val = format.replace('mm', month).replace('dd', day).replace('yyyy', year);
-						
-						ctrl.$setViewValue(val);
-					}
-				});
+				$timeout(function() {
 				
-				var off = offset();
-				scope.offset = {
-					top: off.top, 
-					left: off.left, 
-					bottom: off.top + elm[0].offsetHeight,
-					right: off.left + elm[0].offsetWidth
-				};
+					scope.date = null;
 				
-				scope.triggered = false;
-				elm.on('focus', function() {
-					if(!scope.triggered) {
-						if(ctrl.$modelValue) {
-							var date = new Date(ctrl.$modelValue);
+					var format = attrs.format || 'mm/dd/yyyy';
+					scope.$watch('date', function(value, old) {
+						if(value && value !== old) {
+							var month = scope.date.getMonth() + 1;
+							month = month < 10 ? '0' + month : month;
+						
+							var day = scope.date.getDate();
+							day = day < 10 ? '0' + day : day;
+						
+							var year = scope.date.getFullYear();
+						
+							var val = format.replace('mm', month).replace('dd', day).replace('yyyy', year);
+						
+							ctrl.$setViewValue(val);
+							ctrl.$render();
+						}
+					});
+				
+					scope.offset = offset();
+					scope.offset.top += elm[0].offsetHeight;
+					scope.triggered = false;
+					elm.on('focus', function() {
+						if(!scope.triggered) {
+							if(ctrl.$modelValue) {
+								var date = new Date(ctrl.$modelValue);
 							
-							if(!isNaN(date.getDate()))
-								scope.date = date;
-							else
-								scope.date = null;
-						}
-						else {
-							scope.date = null
-						}
+								if(!isNaN(date.getDate()))
+									scope.date = date;
+								else
+									scope.date = null;
+							}
+							else {
+								scope.date = null
+							}
 						
-						var cal = angular.element('<bs5-calendar date="date" offset="offset" triggered="triggered"></bs5-calendar>');
-						$document.find('body').append(cal);
+							var cal = angular.element('<bs5-calendar date="date" offset="offset" triggered="triggered"></bs5-calendar>');
+							$document.find('body').append(cal);
 				
-						$compile(cal)(scope);
+							$compile(cal)(scope);
 						
-						scope.triggered = true;
-					}
-				});
+							scope.triggered = true;
+						}
+					});
+					
+				}, 250);
 				
 			}
 		}
@@ -1091,12 +1085,13 @@
 			scope: {
 				date: '=',
 				offset: '=',
-				triggeed: '='
+				triggered: '='
 			},
 			templateUrl: function(elm, attrs) {
 				return attrs.templateUrl || 'angular/bootstrap5/templates/datepicker/calendar.html';
 			},
 			link: function(scope, elm, attrs) {
+				
 				var ref = null;
 				var init = function() {
 					scope.calendar = [];
@@ -1122,17 +1117,19 @@
 					
 					var month = ref.getMonth();
 					var day = 1;
+					ref.setDate(day);
+					ref.setHours(0, 0, 0, 0);
 					
 					var brake = false;
 					
 					for(var i = 0; i < scope.calendar.length && day <= 31; i++) {
 						for(var j = ref.getDay(); j < scope.calendar[i].length && day <= 31 && !brake; j++) {
+							scope.calendar[i][j].number = day;
+							scope.calendar[i][j].date = angular.copy(ref);
+							scope.calendar[i][j].selected = scope.date && scope.date.getTime() === scope.calendar[i][j].date.getTime();
+							day++;
 							ref.setDate(day);
 							ref.setHours(0, 0, 0, 0);
-							calendar[i][j].number = day;
-							calendar[i][j].date = angular.copy(ref);
-							calendar[i][j].selected = scope.date && scope.date.getTime() === calendar[i][j].date.gettime();
-							day++;
 							
 							if(ref.getMonth() !== month)
 								brake = true;
@@ -1143,6 +1140,9 @@
 					ref.setMonth(month);
 					ref.setHours(0, 0, 0, 0);
 					
+					if(month === 11)
+						ref.setYear(ref.getFullYear() - 1);
+					
 					scope.month = bs5MonthNames[month];
 					scope.year = ref.getFullYear();
 				};
@@ -1152,7 +1152,7 @@
 						from: {opacity: 0},
 						to: {opacity: 1},
 						duration: 0.25
-					}).finally(init);
+					}).start().finally(init);
 				}
 				else {
 					$animate.animate(elm, {opacity: 0}, {opacity: 1}).finally(init);
@@ -1164,7 +1164,7 @@
 							from: {opacity: 1},
 							to: {opacity: 0},
 							duration: 0.25
-						}).finally(function() {
+						}).start().finally(function() {
 							scope.triggered = false;
 							elm.remove();
 						});
@@ -1233,7 +1233,7 @@
 	angular.module('angular/bootstrap5/templates/datepicker/calendar.html', []).run(['$templateCache', function($templateCache) {
 		$templateCache.put(
 			'angular/bootstrap5/templates/datepicker/calendar.html',
-			'<div class="card" style="width: 350px; position: absolute; right: {{offset.right}}px; top: {{offset.bottom}}px; opacity: 0; border: 1px solid black;">' +
+			'<div class="card" style="position: absolute; left: {{offset.left}}px; top: {{offset.top}}px; opacity: 0; border: 1px solid black;">' +
 				'<div class="card-body">' +
 					'<div class="row">' +
 						'<div class="col-12">' +
@@ -1242,7 +1242,7 @@
 					'</div>' +
 					'<div class="row">' +
 						'<div class="col-2">' +
-							'<button type="button" class="btn btn-light" ng-click="previousMonth()" style="width: 100%">&lt;</button>' +
+							'<button type="button" class="btn btn-light" ng-click="previousMonth()" style="width: 100%;">&lt;</button>' +
 						'</div>' +
 						'<div class="col-8">' +
 							'<p class="text-center">{{month}} {{year}}</p>' +
@@ -1256,16 +1256,18 @@
 							'<table class="table">' +
 								'<tbody>' +
 									'<tr>' +
-										'<td><strong>Sunday</strong></td>' +
-										'<td><strong>Monday</strong></td>' +
-										'<td><strong>Tuesday</strong></td>' +
-										'<td><strong>Wednesday</strong></td>' +
-										'<td><strong>Thursday</strong></td>' +
-										'<td><strong>Friday</strong></td>' +
-										'<td><strong>Saturday</strong></td>' +
+										'<td class="text-center"><strong>Sun</strong></td>' +
+										'<td class="text-center"><strong>Mon</strong></td>' +
+										'<td class="text-center"><strong>Tue</strong></td>' +
+										'<td class="text-center"><strong>Wed</strong></td>' +
+										'<td class="text-center"><strong>Thur</strong></td>' +
+										'<td class="text-center"><strong>Fri</strong></td>' +
+										'<td class="text-center"><strong>Sat</strong></td>' +
 									'</tr>' +
 									'<tr ng-repeat="row in calendar">' +
-										'<td ng-repeat="cell in row"><button class="btn" ng-class="{\'btn-light\': !cell.selected, \'btn-primary\': cell.selected, disabled: !cell.date} ng-disabled="!cell.date" ng-click="selectCell(cell)" style="width: 100%">{{cell.number}}</button>' +
+										'<td ng-repeat="cell in row">' +
+											'<button class="btn" ng-class="{\'btn-light\': !cell.selected, \'btn-primary\': cell.selected, disabled: !cell.date}" ng-disabled="!cell.date" ng-click="selectCell(cell)" style="width: 100%;">{{cell.number}}</button>' +
+										'</td>' +
 									'</tr>' +
 								'</tbody>' +
 							'</table>' +

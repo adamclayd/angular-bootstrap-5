@@ -429,7 +429,7 @@ module.controller('MainController', ['$scope', function($scope) {
 ...
 ```
 
-## Datepicker (Untested)
+## Datepicker
 
 #### Directive: bs5Datepicker
 
@@ -469,4 +469,4 @@ module.controller('MainController', ['$scope', function($scope) {
 - [x] Make pagination work if the number of pages gets changed and fix the problem where there 
       is only one list of pages.
 - [x] Add a datepicker.
-- [ ] Test and fix any bugs that popup on the datepicker
+- [x] Test and fix any bugs that popup on the datepicker
