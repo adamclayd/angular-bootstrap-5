@@ -1116,6 +1116,7 @@
 						ref = new Date();
 					
 					var month = ref.getMonth();
+					var year = ref.getFullYear();
 					var day = 1;
 					ref.setDate(day);
 					ref.setHours(0, 0, 0, 0);
@@ -1139,9 +1140,7 @@
 					ref.setDate(1);
 					ref.setMonth(month);
 					ref.setHours(0, 0, 0, 0);
-					
-					if(month === 11)
-						ref.setYear(ref.getFullYear() - 1);
+					ref.setYear(year);
 					
 					scope.month = bs5MonthNames[month];
 					scope.year = ref.getFullYear();
