@@ -52,7 +52,6 @@ module.controller('MainController', ['$scope', function($scope) {
 
 ## Accordion
 
-
 #### Directive: bs5Accordion
 ```
 Attributes
@@ -284,6 +283,9 @@ module.controller('MainController', ['$scope', '$bs5Modal', function($scope, $bs
 
 ## Tooltip
 
+Tooltips have a template url that can load html content into the tooltip. It does not get compiled though so you can only
+display text or html.
+
 #### Directive: bs5Tooltip
 ```
 Attributes
@@ -314,6 +316,9 @@ Attributes
 ```
 
 ## Popover
+
+You can specify a template url and the html content gets compiled. So you can have a popover with interactable html. If you
+need a result from a popover you can use the `load` option to access the scope of the popover and return the result with a promise.
 
 #### Directive: bs5Popover
 
@@ -359,6 +364,44 @@ Attributes
 ```html
 <button type="button" class="btn btn-primary" bs5-popover="<h1>Test Popover</h1>" html="true" title="Popover">Popover</button>
 ```
+
+###### Advanced Use
+
+```html
+<div ng-controller="MainController">
+	<button type="button" class="btn btn-primary" bs5-popover load="popoverLoad($scope, $popover)" template-url="popover.html" html="true" title="Popover">Popover</button>
+</div>
+<script type="text/ng-template" id="popover.html">
+	<p>{{popoverText}}</p>
+	<div class="text-end">
+		<button type="button" class="btn btn-success" ng-click="resolve()">Resolve</button>
+		<button type="button" class="btn btn-danger" ng-click="close()">Close</button>
+	</div> 
+</script>
+```
+
+```javascript
+module.controller('MainController', ['$scope', '$q', function($scope, $q) {
+	$scope.popoverLoad = function(scope, popover) {
+		deferred = $q.defer();
+		
+		scope.popoverText = "Advanced use popover";
+		
+		scope.resolve = function() {
+			deferred.resolve('Popover Resolved');
+			popover.hide();
+		};
+		
+		scope.close = function() {
+			popover.hide();
+		};
+		
+		deferred.promise.then(function(data) {
+			alert(data); // should alert 'Popover Resolved'
+		});
+	};
+}]);
+
 
 ## Pageination
 
