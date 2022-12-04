@@ -1048,7 +1048,7 @@
 								scope.date = null
 							}
 						
-							var cal = angular.element('<bs5-calendar date="date" offset="offset" triggered="triggered"></bs5-calendar>');
+							var cal = angular.element('<bs5-datepicker-calendar date="date" offset="offset" triggered="triggered"></bs5-calendar>');
 							$document.find('body').append(cal);
 				
 							$compile(cal)(scope);
@@ -1078,7 +1078,7 @@
 		"December"
 	]);
 	
-	datepicker.directive('bs5Calendar', ['$animate', '$injector', 'bs5MonthNames', function($animate, $injector, bs5MonthNames) {
+	datepicker.directive('bs5DatepickerCalendar', ['$animate', '$injector', 'bs5MonthNames', function($animate, $injector, bs5MonthNames) {
 		var $animateCss = $injector.has('$animateCss') ? $injector.get('$animateCss') : null;
 		
 		return {
