@@ -19,7 +19,8 @@
 		'bs5.popover',
 		'bs5.pagination',
 		'bs5.datepicker',
-		'bs5.rating'
+		'bs5.rating',
+		'bs5.autocomplete'
 	]);
 	
 	var templates = angular.module('bs5.templates', [
@@ -31,7 +32,8 @@
 		'angular/bootstrap5/templates/tabs/tab.html',
 		'angular/bootstrap5/templates/pagination/pagination.html',
 		'angular/bootstrap5/templates/datepicker/calendar.html',
-		'angular/bootstrap5/templates/rating/rating.html'
+		'angular/bootstrap5/templates/rating/rating.html',
+		'angular/bootstrap5/templates/autocomplete/list.html'
 	]);
 	
 	
@@ -1034,7 +1036,8 @@
 					scope.offset = offset();
 					scope.offset.top += elm[0].offsetHeight;
 					scope.triggered = false;
-					elm.on('focus', function() {
+					
+					var focusClick = function() {
 						if(!scope.triggered) {
 							if(ctrl.$modelValue) {
 								var date = new Date(ctrl.$modelValue);
@@ -1055,6 +1058,15 @@
 						
 							scope.triggered = true;
 						}
+					};
+					
+					elm.on('focus', focusClick);
+					elm.on('click', focusClick);
+					
+					elm.on('keydown', function() {
+						scope.$apply(function() {
+							scope.triggered = false;
+						});
 					});
 					
 				}, 250);
@@ -1157,6 +1169,11 @@
 					$animate.animate(elm, {opacity: 0}, {opacity: 1}).finally(init);
 				}
 				
+				scope.$watch('triggered', function(value, old) {
+					if(!value)
+						elm.remove();
+				});
+				
 				scope.close = function() {
 					if($animateCss) {
 						$animateCss(elm, {
@@ -1165,13 +1182,11 @@
 							duration: 0.25
 						}).start().finally(function() {
 							scope.triggered = false;
-							elm.remove();
 						});
 					}
 					else {
 						$animate.animate(elm, {opacity: 1}, {opacity: 0}).finally(function() {
 							scope.triggered = false;
-							elm.remove();
 						});
 					}
 				};
@@ -1340,6 +1355,30 @@
 		$templateCache.put(
 			'angular/bootstrap5/templates/rating/rating.html',
 			'<i class="bi {{$index < value ? stateOnIcon : stateOffIcon}}" ng-repeat="r in range" ng-mouseenter="enter($index + 1)" ng-click="rate($index + 1)" ng-mouseleave="leave()"></i>'
+		);
+	}]);
+	
+	var autocomplete = angular.module('bs5.autocomplete', []);
+	
+	autocomplete.directive('bs5Autocomplete', ['$timeout', function($timeout) {
+		return {
+			restrict: 'A',
+			require: 'ngModel',
+			scope: {
+				onSelect: '&?',
+			},
+			
+		};
+	}]);
+	
+	angular.module('angular/bootstrap5/templates/autocomplete/list.html', []).run(['$templateCache', function($templateCache) {
+		$templateCache.put(
+			'angular/bootstrap5/templates/autocomplete/list.html',
+			'<ul class="list-group">' +
+				'<li class="list-group-item" ng-repeat="item in items" ng-click="select($index)" ng-mouseeter="highlight($index)" ng-class="{active: highlighted === $index}">' +
+					'{{item}}' +
+				'</li>' +
+			'</ul>'
 		);
 	}]);
 })();
