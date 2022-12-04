@@ -1247,7 +1247,7 @@
 	angular.module('angular/bootstrap5/templates/datepicker/calendar.html', []).run(['$templateCache', function($templateCache) {
 		$templateCache.put(
 			'angular/bootstrap5/templates/datepicker/calendar.html',
-			'<div class="card" style="position: absolute; left: {{offset.left}}px; top: {{offset.top}}px; opacity: 0; border: 1px solid black;">' +
+			'<div class="card" style="position: absolute; left: {{offset.left}}px; top: {{offset.top}}px; opacity: 0; border: 1px solid black; z-index: 9999">' +
 				'<div class="card-body">' +
 					'<div class="row">' +
 						'<div class="col-12">' +
@@ -1360,14 +1360,227 @@
 	
 	var autocomplete = angular.module('bs5.autocomplete', []);
 	
-	autocomplete.directive('bs5Autocomplete', ['$timeout', function($timeout) {
+	autocomplete.directive('bs5Autocomplete', ['$timeout', '$http', '$compile', '$document', function($timeout, $http, $compile, $document) {
 		return {
 			restrict: 'A',
 			require: 'ngModel',
 			scope: {
 				onSelect: '&?',
+				datasource: '=?',
+				remoteAddr: '@?',
+				remoteAddrParams: '=?',
+				remoteAddrMethod: '@?'
 			},
-			
+			link: function(scope, elm, attrs, ctrl) {
+				function offset() {  					
+  					var rect = elm[0].getBoundingClientRect(),
+					scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
+					scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+					return { 
+						top: rect.top + scrollTop, 
+						left: rect.left + scrollLeft,
+						width: elm[0].offsetWidth,
+						height: elm[0].offsetHeight,
+					};
+				}
+				
+				$timeout(function() {
+					var minChars = scope.$eval(attrs.minCharacters) || 3;
+					scope.modelCtrl = ctrl;
+					
+					scope.onSelect = scope.onSelect || null;
+					scope.items = [];
+					scope.offset = offset();
+					scope.offset.top += scope.offset.height;
+					
+					scope.triggered = false;
+					
+					var oldModelValue = null;
+					
+					elm.on('keyup', function(e) {
+						var triggerAutocomplete = function() {
+							if(!scope.triggered) {
+								scope.triggered = true;
+								var autocomplete = angular.element('<bs5-autocomplete-list triggered="triggered" items="items" offset="offset" select="onSelect" model="modelCtrl"></bs5-autocomplete-list>');
+								$document.find('body').append(autocomplete);
+								$compile(autocomplete)(scope);
+							}
+						};
+						
+						scope.$apply(function() {
+							if(e.which !== 13 && (e.which < 37 || e.which > 40)) {
+								if(ctrl.$modelValue.length >= minChars && oldModelValue !== ctrl.$modelValue) {
+									oldModelValue = ctrl.$modelValue;
+									if (scope.remoteAddr) {
+										scope.remoteAddrMethod = scope.remoteAddrMethod || 'POST';
+										
+										var params = {term: ctrl.$modelValue};
+										
+										if(angular.isObject(scope.remoteAddrParams))
+											params = angular.extend({}, scopeRemoteAddrParams, params);
+											
+										$http({
+											url: scope.remoteAddr,
+											method: scope.remoteAddrMethod,
+											data: params,
+											returnType: 'json'
+										}).then(function(r) {
+											scope.items = r.data;
+											triggerAutocomplete();
+										});
+									}
+									else if(angular.isArray(scope.datasource)) {
+										scope.items = scope.datasource.filter(function(value) {
+											var regex = new RegExp('^' + ctrl.$modelValue + '.*$', 'i');
+											return regex.test(value);
+										});
+										
+										triggerAutocomplete();
+									}
+								}
+								else {
+									scope.items = [];
+								}
+							}
+						});
+					});
+					
+					elm.on('blur', function() {
+						scope.$apply(function() {
+							scope.triggered = false;
+						});
+					});
+					
+				}, 250);
+			}
+		};
+	}]);
+	
+	autocomplete.directive('bs5AutocompleteList', ['$document', '$timeout', '$interval', function($document, $timeout, $interval) {
+		return {
+			restrict: 'E',
+			replace: true,
+			scope: {
+				triggered: '=',
+				items: '=',
+				offset: '=',
+				model: '=',
+				items: '='
+			},
+			templateUrl: 'angular/bootstrap5/templates/autocomplete/list.html',
+			link: function(scope, elm, attrs) {
+				elm.css({
+					'position': 'absolute',
+					'left': scope.offset.left + 'px',
+					'top': scope.offset.top + 'px',
+					'width': scope.offset.width,
+					'z-index': 9999,
+					'overflow-x': 'hidden'
+				});
+				
+				scope.$watch('triggered', function(value) {
+					if(!value)
+						elm.remove();
+				});
+				
+				scope.$watch('items.length', function(value) {
+					if(value === 0)
+						scope.triggered = false;
+				});
+				
+				scope.highlighted = null;
+				scope.highlight = function(index) {
+					scope.highlighted = index;
+				};
+				
+				scope.unhighlight = function() {
+					scope.highlighted = null;
+				}
+				
+				scope.selectItem = function() {
+					scope.model.$setViewValue(scope.items[scope.highlighted]);
+					scope.model.$render();
+					scope.triggered = false;
+					
+					if(scope.select) {
+						scope.select();
+					}
+				}
+				
+				var downPressed = false;
+				var upPressed = false;
+				var interval = null;
+				
+				var keydown = function(e) {
+					if(e.which === 38) {
+						upPressed = true;
+						
+						var goUp = function() {
+							if(scope.highlighted && upPressed) {
+								scope.hightlighted--;	
+							}
+						};
+						
+						scope.$apply(goUp);
+						
+						$timeout(function() {
+							if(upPressed) {
+								interval = $interval(goUp, 500);
+							}
+						}, 1000);
+					}
+					else if(e.which === 40) {
+						downPressed = true;
+						
+						var goDown = function() {
+							if(downPressed) {
+								if(scope.highlighted === null)
+									scope.highlighted = 0;
+								else if(scope.highlighted < scope.items.length)
+									scope.highlighted++;
+							}
+						};
+						
+						scope.$apply(goDown);
+						
+						$timeout(function() {
+							if(downPressed) {
+								interval = $interval(goDown, 500);
+							}
+						}, 1000);
+					}
+					else if(e.which === 13) {
+						scope.$apply(scope.selectItem);
+					}
+				};
+				
+				var keyup = function(e) {
+					if(e.which === 38) {
+						upPressed = false;
+						
+						if(interval) {
+							$interval.cancel(interval);
+							interval = null;
+						}
+					}
+					else if(e.which === 40) {
+						downPressed = false;
+						
+						if(interval) {
+							$interval.cancel(interval);
+							interval = null;
+						}
+					}
+				};
+				
+				$document.on('keyup', keyup);
+				$document.on('keydown', keydown);
+				
+				scope.$on('$destroy', function() {
+					$document.off('keyup', keyup);
+					$document.off('keydown', keydown);
+				});
+			}
 		};
 	}]);
 	
@@ -1375,7 +1588,7 @@
 		$templateCache.put(
 			'angular/bootstrap5/templates/autocomplete/list.html',
 			'<ul class="list-group">' +
-				'<li class="list-group-item" ng-repeat="item in items" ng-click="select($index)" ng-mouseeter="highlight($index)" ng-class="{active: highlighted === $index}">' +
+				'<li class="list-group-item" ng-repeat="item in items" ng-mousedown="selectItem()" ng-mouseenter="highlight($index)" ng-class="{active: highlighted === $index}" ng-mouseleave="uhighlight()">' +
 					'{{item}}' +
 				'</li>' +
 			'</ul>'

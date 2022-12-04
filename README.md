@@ -508,4 +508,59 @@ module.controller('MainController', ['$scope', function($scope) {
 }]);
 
 ...
+
+## Autocomplete
+
+The autocomplete makes a list of suggestions under a text input after you enter so many characters.
+You can use an array of strings for the data source to search through or you can make a remote call
+and get the data from a server. If you use the remote address option your server will have to 
+respond with a json encoded array of strings. It sends `term` as a parameter that contains the data in 
+the input box
+
+#### Directive: bs5Autocomplete
+
+```
+Requires
+	ngModel
+
+Attributes
+	datasource           - An array of strings for the autocomplete to use. 
+
+	min-characters       - The minimum number of characters to type in before the autocomplete will be displayed.
+	                       Default is 3.
+	
+	on-select()          - A function that is executed after you selected something from the autocomplete list.
+	
+	remote-addr          - The url of the server call to get the data from. The server needs to respond with
+	                       json encoded array of strings. 'term' is sent as a parameter.
+	                    
+	remote-addr-params    - Object of additional parameters to use for the remote call.
+	
+	remote-addr-method    - The http method of the remote call. Default is 'POST'
+```
+
+###### HTML File
+
+```html
+...
+
+<div ng-controller="MainController">
+	<input type="text" ng-model="model" bs5-autocomplete min-characters="2" datasource="datasource" />
+</div>
+
+...
+```
+
+###### Javascript File
+
+```
+...
+
+module.controller('MainController', ['$scope', function($scope) {
+	$scope.model = null;
+	
+	$scope.datasource = ['Foo', 'Bar', 'Baz', 'Foobaz', 'Barfoo', 'Foobar', 'Bazfoo'];
+}]);
+
+...
 ```
