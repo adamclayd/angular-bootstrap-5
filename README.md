@@ -401,6 +401,7 @@ module.controller('MainController', ['$scope', '$q', function($scope, $q) {
 		});
 	};
 }]);
+```
 
 
 ## Pageination
