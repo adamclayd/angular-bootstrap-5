@@ -553,7 +553,7 @@ Attributes
 
 ###### Javascript File
 
-```
+```javascript
 ...
 
 module.controller('MainController', ['$scope', function($scope) {
