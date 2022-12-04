@@ -508,6 +508,7 @@ module.controller('MainController', ['$scope', function($scope) {
 }]);
 
 ...
+```
 
 ## Autocomplete
 
