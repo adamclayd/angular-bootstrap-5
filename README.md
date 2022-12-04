@@ -27,7 +27,7 @@ thats comes with AngularJS.
 The `bs5-collapse` attribute is a boolean to determine if the collapse is collapsed or not. Set to `true` to hide the collapse.
 Set to `false` to expand the collapse.
 
-###### HTML File
+###### Example
 ```html
 ...
 <div ng-controller="MainController">
@@ -40,7 +40,6 @@ Set to `false` to expand the collapse.
 
 ```
 
-###### Javascript File
 ```javascript
 ...
 module.controller('MainController', ['$scope', function($scope) {
@@ -64,6 +63,7 @@ Attributes
 	heading - set the title for the accordion group
 	is-open - whether the accordion group is opened or not
 ```
+
 ###### Example
 
 ```html
@@ -115,7 +115,8 @@ Attributes
 	animate         - If true then the stripes will be animated. Default is false.
 ```
 
-###### HTML File
+###### Example
+
 ```html
 ...
 
@@ -127,7 +128,6 @@ Attributes
 ...
 ```
 
-###### Javascript File
 ```javascript
 ...
 
@@ -224,7 +224,7 @@ Returns
 	}
 ```
 
-###### HTML File
+###### Example
 ```html
 ...
 
@@ -247,7 +247,6 @@ Returns
 ...
 ```
 
-###### Javascript File
 ```javascript
 ...
 
@@ -439,7 +438,7 @@ Attributes
 	
 ```
 
-###### HTML File
+###### Example
 
 ```html
 ...
@@ -450,8 +449,6 @@ Attributes
 
 ...
 ```
-
-###### Javascript File
 
 ```javascript
 ...
@@ -485,7 +482,7 @@ Attributes
 	format - The format to put the date in after selected. Defaults to 'mm/dd/yyyy'.
 ```
 
-###### HTML File
+###### Example
 ```html
 ...
 
@@ -495,8 +492,6 @@ Attributes
 
 ...
 ```
-
-###### Javascript File
 
 ```javascript
 ...
@@ -531,7 +526,7 @@ Attributes
 	stateOffIcon - The icon class that is not filled in. Default is 'bi-star'.
 ```
 
-###### HTML File
+###### Example
 
 ```html
 ...
@@ -541,8 +536,6 @@ Attributes
 </div>
 ...
 ```
-
-###### Javascript File
 
 ```javascript
 ...
@@ -584,7 +577,7 @@ Attributes
 	remote-addr-method    - The http method of the remote call. Default is 'POST'
 ```
 
-###### HTML File
+###### Example
 
 ```html
 ...
@@ -595,8 +588,6 @@ Attributes
 
 ...
 ```
-
-###### Javascript File
 
 ```javascript
 ...
