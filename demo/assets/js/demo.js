@@ -96,7 +96,7 @@
 				$scope.pagination.pager.numItems = $scope.pagination.data.length;
 				$scope.pagination.pager.items = [];
 				
-				for(var i = page - 1; i < (page - 1) + pageSize && i < $scope.pagination.data.length; i++) {
+				for(var i = (page - 1) * pageSize; i < ((page - 1) * pageSize) + pageSize && i < $scope.pagination.data.length; i++) {
 					$scope.pagination.pager.items.push($scope.pagination.data[i]);
 				}
 			}
