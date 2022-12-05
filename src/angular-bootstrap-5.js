@@ -20,7 +20,8 @@
 		'bs5.pagination',
 		'bs5.datepicker',
 		'bs5.rating',
-		'bs5.autocomplete'
+		'bs5.autocomplete',
+		'bs5.position'
 	]);
 	
 	var templates = angular.module('bs5.templates', [
@@ -997,20 +998,116 @@
 		)
 	}]);
 	
+	var position = angular.module('bs5.position', []);
+	
+	position.service('$bs5Position', function() {
+		var self = this;
+		this.offset = function(elm) {
+			var rect = elm[0].getBoundingClientRect(),
+			scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
+			scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+			return { 
+				top: rect.top + scrollTop, 
+				left: rect.left + scrollLeft,
+				width: elm[0].offsetWidth,
+				height: elm[0].offsetHeight
+			};
+		};
+		
+		this.positionTarget = function(hostElmOffset, targetElmOffset, placement) {
+			var host = hostElmOffset;
+			if(angular.isElement(host))
+				host = self.offset(hostElmOffset);
+			
+			var target = targetElmOffset
+			if(angular.isElement(targetElmOffset))
+				target = self.offset(targetElm);
+			
+			var left = host.left;
+			var top = host.top;
+			if(placement === 'top') {
+				top = host.top - target.height;
+			}
+			else if(placement === 'left') {
+				left = host.left - target.width
+			}
+			else if(placement === 'bottom') {
+				top = host.top + host.height;
+			}
+			else if (placement === 'right') {
+				left = host.left + host.width
+			}
+			else if(placement === 'top-left') {
+				left = host.left - target.width;
+				top = host.top - target.height;
+			}
+			else if(placement === 'top-right') {
+				left = host.left + host.width;
+				top = host.top - target.height;
+			}
+			else if(placement === 'bottom-left') {
+				left = host.left - target.width;
+				top = host.top + host.height;
+			}
+			else if(placement === 'bottom-right') {
+				left = host.left + host.width;
+				top = host.top + host.height;
+			}
+			else if(placement === 'top-center') {
+				top = host.top - target.height;
+				var diff = Math.abs((host.width / 2) - (target.width / 2));
+				
+				if(host.width > target.width)
+					left = host.left + diff;
+					
+				else if(host.width < target.width)
+					left = host.left - diff;
+			}
+			else if(placement === 'left-center') {
+				left = host.left - target.width;
+				var diff = Math.abs((host.height / 2) - (target.height / 2));
+				
+				if(host.height > target.height)
+					top = host.top + diff;
+					
+				else if(host.height < target.height)
+					top = host.top - diff;
+			}
+			else if(placement === 'bottom-center') {
+				top = host.top + host.height;
+				var diff = Math.abs((host.width / 2) - (target.width / 2));
+				
+				if(host.width > target.width)
+					left = host.left + diff;
+					
+				else if(host.width < target.width)
+					left = host.left - diff;
+			}
+			else if(placement === 'right-center') {
+				left = host.left + host.width
+				var diff = Math.abs((host.height / 2) - (target.height / 2));
+				
+				if(host.height > target.height)
+					top = host.top + diff;
+					
+				else if(host.height < target.height)
+					top = host.top - diff;
+			}
+			
+			return {
+				left: left,
+				top: top
+			};
+		};
+	});
+	
 	var datepicker = angular.module('bs5.datepicker', []);
 	
-	datepicker.directive('bs5Datepicker', ['$compile', '$document', '$timeout', function($compile, $document, $timeout) {
+	datepicker.directive('bs5Datepicker', ['$compile', '$document', '$timeout', '$bs5Position', function($compile, $document, $timeout, $bs5Position) {
 		return {
 			restrict: 'A',
 			require: '^ngModel',
 			link: function(scope, elm, attrs, ctrl) {
-				function offset() {  					
-  					var rect = elm[0].getBoundingClientRect(),
-					scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
-					scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-					return { top: rect.top + scrollTop, left: rect.left + scrollLeft };
-				}
-				
 				$timeout(function() {
 				
 					scope.date = null;
@@ -1033,7 +1130,7 @@
 						}
 					});
 				
-					scope.offset = offset();
+					scope.offset = $bs5Position.offset(elm);
 					scope.offset.top += elm[0].offsetHeight;
 					scope.triggered = false;
 					
@@ -1360,7 +1457,7 @@
 	
 	var autocomplete = angular.module('bs5.autocomplete', []);
 	
-	autocomplete.directive('bs5Autocomplete', ['$timeout', '$http', '$compile', '$document', function($timeout, $http, $compile, $document) {
+	autocomplete.directive('bs5Autocomplete', ['$timeout', '$http', '$compile', '$document', '$bs5Position', function($timeout, $http, $compile, $document, $bs5Position) {
 		return {
 			restrict: 'A',
 			require: 'ngModel',
@@ -1372,25 +1469,13 @@
 				remoteAddrMethod: '@?'
 			},
 			link: function(scope, elm, attrs, ctrl) {
-				function offset() {  					
-  					var rect = elm[0].getBoundingClientRect(),
-					scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
-					scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-					return { 
-						top: rect.top + scrollTop, 
-						left: rect.left + scrollLeft,
-						width: elm[0].offsetWidth,
-						height: elm[0].offsetHeight,
-					};
-				}
-				
 				$timeout(function() {
 					var minChars = scope.$eval(attrs.minCharacters) || 3;
 					scope.modelCtrl = ctrl;
 					
 					scope.onSelect = scope.onSelect || null;
 					scope.items = [];
-					scope.offset = offset();
+					scope.offset = $bs5Position.offset(elm);
 					scope.offset.top += scope.offset.height;
 					
 					scope.triggered = false;
