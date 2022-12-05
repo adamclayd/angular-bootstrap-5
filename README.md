@@ -288,25 +288,22 @@ display text or html.
 #### Directive: bs5Tooltip
 ```
 Attributes
-	animate     - Make the tooltip do the fade in animation. Default is true 
+	animate                - Make the tooltip do the fade in animation. Default is true 
 	
-	bs5-tooltip - The tooltip content if templateUrl is not defined.
-
-	delay       - A number or an object with show and hide properties that specifies
-	              the delay when showing or hiding the tooltip. Default is 0.
+	bs5-tooltip            - The tooltip content if templateUrl is not defined.
 	          
-	html        - If true then the tooltip can contain html. Default is false.
+	html                   - If true then the tooltip can contain html. Default is false.
 	
-	offset      - Array [x, y] to offset the tooltip. Default is [0, 0].
+	placement              - The placement of the tooltip on the element. Valid values are 'top', 'left', 
+	                         'bottom', and 'right'. Default is 'top'.
 	
-	placement  - The placement of the tooltip on the element. Valid values are 'top', 'left', 
-	             'bottom', and 'right'. Default is 'top'.
-	
-	templateUrl - The url to the html content that will be put in the tooltip. If defined then
-	              html option will be true.
+	templateUrl            - The url to the html content that will be put in the tooltip. If defined then
+	                         html option will be true.
+	              
+	tooltip-template-url   - A url that points to a custom popover template. It defaults to one stored in template cache.
                    
-	trigger     - The way the tooltip is triggered. Valid values are 'hover', 'focus', and 'click'.
-	              Default is 'hover'
+	trigger                - The way the tooltip is triggered. Valid values are 'hover', 'focus', and 'click'.
+	                         Default is 'hover'
 ```
 
 ###### Example
@@ -327,33 +324,25 @@ Attributes
 	                          Default is true.
 	                
 	bs5-popover             - Content to use for the popover if templateUrl is not defined.
-	          
-	container               - A string selector to the element that the popover will append to.
-	                          Default is 'body'.
-	            
-	delay                   - A number or an object with show and hide properties that indicates
-	                          the time that the popover should wait before it is shown or hidden.
-	                          Default is 0.
 	
 	html                   - If true the html is allowed in the popover. Default is false.
 	
-	load($scope, $popover) - Function that is executed each time the popover is created and shown.
-	                         it provides $scope and $popover as passable parameters where $scope is the
-	                         scope of the popover and $popover is the bootstrap.Popover object for the element.
-	
-	offset                 - Place the popover [x, y] from the center. Default is [0, 0].
+	load($popover)         - Function that is executed each time the popover is created and shown.
+	                         it provides $popover as a passable parameter and it has a scope property so you can
+	                         access scope of the popover.
 	
 	placement              - Where to place the popover around the element. Valid values are
 	                         'top', 'left', 'bottom', and 'right'. Default is 'right'.
+	popover-template-url   - A url that points to a custom popover template. It defaults to one stored in template cache.
 	            
 	templateUrl            - The url of the html template to use for the popover cocontent
 	                         Option html is true if this option is set
 	            
-	title                   - The title of the popover that is displayed in the header of the popover.
-	                          Default is a blank string ('').
-	             
-	trigger                 - The type of event that is used to trigger the popover. Valid values are
-	                          'click', 'hover', and 'focus'. Default is 'click'.
+	title                  - The title of the popover that is displayed in the header of the popover.
+	                         Default is a blank string ('').
+	                         	             
+	trigger                - The type of event that is used to trigger the popover. Valid values are
+	                         'click', 'hover', and 'focus'. Default is 'click'.
 	            
 	
 ```
@@ -368,7 +357,7 @@ Attributes
 
 ```html
 <div ng-controller="MainController">
-	<button type="button" class="btn btn-primary" bs5-popover load="popoverLoad($scope, $popover)" template-url="popover.html" html="true" title="Popover">Popover</button>
+	<button type="button" class="btn btn-primary" bs5-popover load="popoverLoad($popover)" template-url="popover.html" html="true" title="Popover">Popover</button>
 </div>
 <script type="text/ng-template" id="popover.html">
 	<p>{{popoverText}}</p>
@@ -381,17 +370,17 @@ Attributes
 
 ```javascript
 module.controller('MainController', ['$scope', '$q', function($scope, $q) {
-	$scope.popoverLoad = function(scope, popover) {
+	$scope.popoverLoad = function(popover) {
 		deferred = $q.defer();
 		
-		scope.popoverText = "Advanced use popover";
+		popover.scope.popoverText = "Advanced use popover";
 		
-		scope.resolve = function() {
+		popover.scope.resolve = function() {
 			deferred.resolve('Popover Resolved');
 			popover.hide();
 		};
 		
-		scope.close = function() {
+		popover.scope.close = function() {
 			popover.hide();
 		};
 		

@@ -34,7 +34,9 @@
 		'angular/bootstrap5/templates/pagination/pagination.html',
 		'angular/bootstrap5/templates/datepicker/calendar.html',
 		'angular/bootstrap5/templates/rating/rating.html',
-		'angular/bootstrap5/templates/autocomplete/list.html'
+		'angular/bootstrap5/templates/autocomplete/list.html',
+		'angular/bootstrap5/templates/popover/popover.html',
+		'angular/bootstrap5/templates/tooltip/tooltip.html'
 	]);
 	
 	
@@ -613,96 +615,193 @@
 	
 	var tooltip = angular.module('bs5.tooltip', []);
 	
-	tooltip.directive('bs5Tooltip', ['$templateCache', '$document', '$compile', '$http', '$q', function($templateCache, $document, $compile, $http, $q) {
-		function genId() {
-			var id = "bs5tooltip" + Math.floor((Math.random() * 100) + 1);
-			
-			if($document[0].querySelector('#' + id))
-				id = genId();
-				
-			return id;
-		};
-		
+	tooltip.directive('bs5Tooltip', ['$templateCache', '$document', '$compile', '$http', '$q', '$bs5Position', '$timeout', '$animate', '$injector', function($templateCache, $document, $compile, $http, $q, $bs5Position, $timeout, $animate, $injector) {
+		var $animateCss = $injector.has('$animateCss') ? $injector.get('$animateCss') : null;
 		return {
 			restrict: 'A',
 			link: function(scope, elm, attrs) {
 				var deferred = $q.defer();
-				var id = genId();
 				
 				var offset = attrs.offset ? scope.$eval(attrs.offset) : [0, 0];
 				var delay = attrs.delay ? scope.$eval(attrs.delay) : 0;
 				var animate = attrs.animate ? !!scope.$eval(attrs.animate) : true;
 				var html = attrs.html ? !!scope.$eval(attrs.html) : false;
+				var placement = attrs.placement === 'left' || attrs.placement === 'bottom' || attrs.placement === 'right' || attrs.placement === 'top' ? attrs.placement : 'top';
 				
 				if(attrs.templateUrl) {
 					$http({
 						url: attrs.templateUrl,
 						method: 'GET'
 					}).then(function(r) {
-						var content = '<div id="' + id + '">' + r.data + '</div>';
+						var content = r.data;
 						deferred.resolve(content);
 					}, function() {
-						var content = '<div id="' + id + '">' + $templateCache.get(attrs.templateUrl) + '</div>';
+						var content = $templateCache.get(attrs.templateUrl);
 						deferred.resolve(content);
 					});
 				}
 				else {
-					var content = html ? '<div id="' + id + '">' + attrs.bs5Tooltip + '</div>' : attrs.bs5Tooltip;
+					var content = html ? attrs.bs5Tooltip : attrs.bs5Tooltip.replace('<', '&lt;').replace('>', '&gt;');
 					deferred.resolve(content);
 				}
 				
 				deferred.promise.then(function(content) {
-					var tooltip = new bootstrap.Tooltip(elm[0], {
-						container: attrs.container || 'body',
-						animation: animate,
-						html: !!attrs.templateUrl || html,
-						sanitize: !!!attrs.templateUrl || !html,
-						title: content,
-						placement: attrs.placement || 'top',
-						delay: angular.isNumber(delay) || angular.isObject(delay) ? delay : 0,
-						offset: angular.isArray(offset) ? offset : [0, 0],
-						trigger: 'manual'
-					});
+					var def = $q.defer();
+					var tooltipTpl = $templateCache.get('angular/bootstrap5/templates/tooltip/tooltip.html');
 					
-					if(attrs.trigger === 'click') {
-						elm.on('click', function() {
-							tooltip.toggle();
-						});
-					}
-					else if(attrs.trigger === 'focus') {
-						elm.on('focus', function() {
-							tooltip.show();
-						});
-						
-						elm.on('blur', function() {
-							tooltip.hide();
-						});
+					if(attrs.tooltipTemplateUrl) {
+						$http({
+							url: attrs.tooltipTemplateUrl,
+							method: 'GET'
+						}).then(function(r) {
+							def.reslove(r.data);
+						}, function() {
+							def.resolve($templateCache.get(attrs.tooltipTemplateUrl || tooltipTpl));
+						})
 					}
 					else {
-						elm.on('mouseenter', function() {
-							tooltip.show();
-						});
-					
-						elm.on('mouseleave', function() {
-							tooltip.hide();
-						});
+						def.resolve(tooltipTpl);
 					}
+					
+					def.promise.then(function(tpl) {
+						var Tooltip = function(tooltipEl) {
+							var self = this;
+							var el = null;
+							
+							this.show = function() {
+								el = angular.copy(tooltipEl);
+								el.addClass(placement === 'left' ? 'bs-tooltip-start' : (placement === 'bottom' ? 'bs-tooltip-bottom' : (placement === 'right' ? 'bs-tooltip-end' : 'bs-tooltip-top')));
+								$document.find('body').append(el);
+								var arrow = angular.element(el[0].querySelector('.tooltip-arrow'));
+								var arrowPlacement = placement === 'left' ? 'right' : (placement === 'bottom' ? 'top' : (placement === 'right' ? 'left' : 'bottom'));
+								
+								$timeout(function() {
+									var pos = $bs5Position.positionTarget(elm, el, placement + '-center');
+									
+									el.css({
+										position: 'absolute',
+										left: pos.left + 'px',
+										top: pos.top + 'px',
+										opacity: animate ? 0 : 1
+									});
+									
+									$timeout(function(){
+										var position = $bs5Position.positionTargetRelative(el, arrow, arrowPlacement + '-center');
+											
+										if(arrowPlacement === 'bottom')
+											position.top -= 6;
+										else if (arrowPlacement === 'left')
+											position.left += 6;
+										else if(arrowPlacement === 'right')
+											position.left -= 6;
+										else if(arrowPlacement === 'top')
+											position.top += 6;
+											
+										
+										arrow.css({
+											position: 'absolute',
+											left: position.left + 'px',
+											top: position.top + 'px'
+										});
+										
+										if(animate) {
+											if($animateCss) {
+												$animateCss(el, {
+													from: {opacity: 0},
+													to: {opacity: 1},
+													duration: 0.5
+												}).start();
+											}
+											else {
+												$animate.animate(el, {opacity: 0}, {opacity: 1});
+											}
+										}
+									}, 1);
+									
+								}, 50);
+							};
+							
+							this.hide = function() {
+								var removeEl = function() {
+									el.remove();
+									el = null;
+								};
+								
+								if(el) {
+									if(animate) {
+										if($animateCss) {
+											$animateCss(el, {
+												from: {opacity: 1},
+												to: {opacity: 0},
+												duration: 0.5
+											}).start().finally(removeEl);
+										}
+										else {
+											$animate.animate(el, {opacity: 1}, {opacity: 0}).finally(removeEl);
+										}
+									}
+									else {
+										removeEl();
+									}
+								}
+							};
+							
+							this.toggle = function() {
+								if(el)
+									self.hide();
+								else
+									self.show();
+							};
+						};
+						
+						var tplEl = angular.element(tpl);
+						angular.element(tplEl[0].querySelector('.tooltip-inner')).append(content);
+						
+						var tooltip = new Tooltip(tplEl);
+					
+						if(attrs.trigger === 'click') {
+							elm.on('click', function() {
+								tooltip.toggle();
+							});
+						}
+						else if(attrs.trigger === 'focus') {
+							elm.on('focus', function() {
+								tooltip.show();
+							});
+						
+							elm.on('blur', function() {
+								tooltip.hide();
+							});
+						}
+						else {
+							elm.on('mouseenter', function() {
+								tooltip.show();
+							});
+					
+							elm.on('mouseleave', function() {
+								tooltip.hide();
+							});
+						}
+					});
 				});
 			}
 		};
 	}]);
 	
+	angular.module('angular/bootstrap5/templates/tooltip/tooltip.html', []).run(['$templateCache', function($templateCache) {
+		$templateCache.put(
+			'angular/bootstrap5/templates/tooltip/tooltip.html',
+			'<div class="tooltip fade show">' +
+				'<div class="tooltip-arrow"></div>' +
+				'<div class="tooltip-inner"></div>' +
+			'</div>'
+		);
+	}]);
+	
 	var popover = angular.module('bs5.popover', []);
 	
-	popover.directive('bs5Popover', ['$templateCache', '$document', '$compile', '$http', '$q', function($templateCache, $document, $compile, $http, $q) {
-		function genId() {
-			var id = 'bs5popover' + Math.floor((Math.random() * 100) + 1);
-			
-			if($document[0].querySelector('#' + id))
-				id = genId();
-				
-			return id;
-		}
+	popover.directive('bs5Popover', ['$templateCache', '$document', '$compile', '$http', '$q', '$timeout', '$bs5Position', '$animate', '$injector', function($templateCache, $document, $compile, $http, $q, $timeout, $bs5Position, $animate, $injector) {
+		var $animateCss = $injector.has('$animateCss') ? $injector.get('$animateCss') : null;
 		
 		return {
 			restrict: 'A',
@@ -711,7 +810,6 @@
 			},
 			link: function(scope, elm, attrs) {
 				var deferred = $q.defer();
-				var id = genId();
 				
 				var animate = attrs.animate ? !!scope.$eval(attrs.animate) : true;
 				var container = attrs.container && $document[0].querySelector(attrs.container) ? attrs.container : 'body';
@@ -727,72 +825,169 @@
 						url: attrs.templateUrl,
 						method: 'GET'
 					}).then(function(r) {
-						var content = '<div id="' + id + '">' + r.data + '</div>';
+						var content = r.data;
 						deferred.resolve(content);
 					}, function() {
-						var content = '<div id="' + id + '">' + $templateCache.get(attrs.templateUrl) + '</div>';
+						var content = $templateCache.get(attrs.templateUrl);
 						deferred.resolve(content);						
 					});
 				}
 				else {
-					var content = html ? '<div id="' + id + '">' + attrs.bs5Popover + '</div>' : attrs.bs5Popover;
+					var content = html ? attrs.bs5Popover : attrs.bs5Popover.replace('<', '&lt;').replace('>', '&gt;');
 					deferred.resolve(content);
 				}
 				
 				deferred.promise.then(function(content) {
-					var popoverScope = scope.$new();
-					var popover = new bootstrap.Popover(elm[0], {
-						animation: animate,
-						container: container,
-						content: content,
-						delay: angular.isNumber(delay) || angular.isObject(delay) ? delay : 0,
-						html: !!attrs.templateUrl || html,
-						placement: placement,
-						title: title,
-						trigger: 'manual',
-						sanitize: !!!attrs.templateUrl || !html,
-						offset: angular.isArray(offset) ? offset : [0, 0]
-					});
+					var def = $q.defer();
 					
-					elm.on('shown.bs.popover', function() {
-						var element = $document[0].querySelector('#' + id);
-						
-						if(element) {
-							$compile(angular.element(element))(popoverScope);
-							
-							if(angular.isFunction(scope.onLoad)) {
-								scope.onLoad({$scope: popoverScope, $popover: popover});
-							}
-						}
-					});
-					
-					
-					if(trigger === 'hover') {
-						elm.on('mouseenter', function() {
-							popover.show();
-						});
-						
-						elm.on('mouseleave', function() {
-							popover.hide();
-						});
-					}
-					else if(trigger === 'focus') {
-						elm.on('focus', function() {
-							popover.show();
-						});
-						
-						elm.on('blur', function() {
-							popover.hide();
+					var popoverTmp = $templateCache.get('angular/bootstrap5/templates/popover/popover.html');
+					if(attrs.popoverTemplateUrl) {
+						$http({
+							url: attrs.popoverTemplateUrl,
+							method: 'GET'
+						}).then(function(r) {
+							def.resolve(r.data);
+						}, function() {
+							def.resolve($templateCache.get(attrs.popoverTemplateUrl) || popoverTmp);
 						});
 					}
 					else {
-						elm.on('click', function() {
-							popover.toggle();
-						});
+						def.resolve(popoverTmp);
 					}
+					
+					def.promise.then(function(tpl) {
+						var tplEl = angular.element(tpl); 
+						angular.element(tplEl[0].querySelector('.popover-body')).append(content);
+						
+						var Popover = function(popoverEl) {
+							var self = this;
+							var el = null;
+							
+							this.scope = scope.$new();
+							this.scope.title = title;
+							
+							this.show = function() {
+								el = angular.copy(popoverEl);
+								el.addClass(placement === 'top' ? 'bs-popover-top' : (placement === 'left' ? 'bs-popover-start' : (placement === 'bottom' ? 'bs-popover-bottom' : 'bs-popover-end')))
+								$document.find('body').append(el);
+								var arrow = angular.element(el[0].querySelector('.popover-arrow'));
+								var arrowPlacement = placement === 'top' ? 'bottom' : (placement === 'left' ? 'right' : (placement === 'bottom' ? 'top' : 'left'));
+								$compile(el)(self.scope);
+								
+								
+								$timeout(function() {
+									var pos = $bs5Position.positionTarget(elm, el, placement + '-center');
+									
+									el.css({
+										position: 'absolute',
+										top: pos.top + 'px',
+										left: pos.left + 'px',
+										opacity: animate ? 0 : 1
+									});
+									
+									$timeout(function() {
+										var position = $bs5Position.positionTargetRelative(el, arrow, arrowPlacement + '-center');
+										
+										arrow.css({
+											position: 'absolute',
+											top: position.top + 'px',
+											left: position.left + 'px'
+										});
+										
+										if(animate) {
+											if($animateCss) {
+												$animateCss(el, {
+													from: {opacity: 0},
+													to: {opacity: 1},
+													duration: 0.5
+												}).start();
+											}
+											else {
+												$animate.animate(el, {opacity: 0}, {opacity: 1});
+											}
+										}
+										
+										if(scope.onLoad) {
+											scope.onLoad({$popover: self});
+										}
+									}, 50);
+								}, 50);
+							};
+							
+							this.hide = function() {
+								var removeEl = function() {
+									el.remove();
+									el = null;
+								};
+								
+								if(el) {
+									if(animate) {
+										if($animateCss) {
+											$animateCss(el,  {
+												from: {opacity: 1},
+												to: {opacity: 0},
+												duration: 0.5
+											}).start().finally(removeEl);
+										}
+										else {
+											$animate.animate(el, {opacity: 1}, {opacity: 0}).finally(removeEl);
+										}
+									}
+									else {
+										removeEl();
+									}
+								}
+							};
+							
+							this.toggle = function() {
+								if(el)
+									self.hide();
+								else
+									self.show();
+							};
+						};
+						
+						var popover = new Popover(tplEl);
+						
+					
+						if(trigger === 'hover') {
+							elm.on('mouseenter', function() {
+								popover.show();
+							});
+						
+							elm.on('mouseleave', function() {
+								popover.hide();
+							});
+						}
+						else if(trigger === 'focus') {
+							elm.on('focus', function() {
+								popover.show();
+							});
+						
+							elm.on('blur', function() {
+								popover.hide();
+							});
+						}
+						else {
+							elm.on('click', function() {
+								popover.toggle();
+							});
+						}
+					});
 				});
 			}
 		};
+	}]);
+	
+	angular.module('angular/bootstrap5/templates/popover/popover.html', []).run(['$templateCache', function($templateCache) {
+		$templateCache.put(
+			'angular/bootstrap5/templates/popover/popover.html',
+			'<div class="popover fade show">' +
+				'<div class="popover-arrow"></div>' +
+				'<div class="popover-header">{{title}}</div>' +
+				'<div class="popover-body"></div>' +
+			'</div>'
+		);
 	}]);
 	
 	var pagination = angular.module('bs5.pagination', []);
@@ -1019,9 +1214,9 @@
 			if(angular.isElement(host))
 				host = self.offset(hostElmOffset);
 			
-			var target = targetElmOffset
+			var target = targetElmOffset;
 			if(angular.isElement(targetElmOffset))
-				target = self.offset(targetElm);
+				target = self.offset(targetElmOffset);
 			
 			var left = host.left;
 			var top = host.top;
@@ -1092,6 +1287,93 @@
 					
 				else if(host.height < target.height)
 					top = host.top - diff;
+			}
+			
+			return {
+				left: left,
+				top: top
+			};
+		};
+		
+		this.positionTargetRelative = function(hostElmOffset, targetElmOffset, placement) {
+			var left = 0;
+			var top = 0;
+			
+			var host = hostElmOffset;
+			if(angular.isElement(host))
+				host = self.offset(host);
+				
+			var target = targetElmOffset;
+			if(angular.isElement(target))
+				target = self.offset(target);
+			
+			if(placement === 'right') {
+				left = host.width;
+			}
+			else if(placement === 'bottom') {
+				top = host.height;
+			}
+			else if(placement === 'left') {
+				left = -target.width;
+			}
+			else if(placement === 'top') {
+				top = -target.height;
+			}
+			else if(placement === 'top-left') {
+				top = -target.height;
+				left = -target.width;
+			}
+			else if(placement === 'top-right') {
+				top = -target.height;
+				left = host.width;
+			}
+			else if(placement === 'bottom-left') {
+				top = host.height;
+				left = -target.width;
+			}
+			else if(placement === 'bottom-right') {
+				top = host.height;
+				left = host.width;
+			}
+			else if(placement === 'top-center') {
+				top = -target.height;
+				var diff = Math.abs((host.width / 2) - (target.width / 2));
+				
+				if(host.width > target.width)
+					left = diff;
+					
+				else if(host.width < target.width)
+					left = -diff;
+			}
+			else if(placement === 'bottom-center') {
+				top = host.height;
+				var diff = Math.abs((host.width / 2) - (target.width / 2));
+				
+				if(host.width > target.width)
+					left = diff;
+					
+				else if(host.width < target.width)
+					left = -diff;
+			}
+			else if(placement === 'left-center') {
+				left = -target.width;
+				var diff = Math.abs((host.height / 2) - (target.height / 2));
+				
+				if(host.height > target.height)
+					top = diff;
+					
+				else if(host.height < target.height)
+					top = -diff;
+			}
+			else if(placement === 'right-center') {
+				left = host.width;
+				var diff = Math.abs((host.height / 2) - (target.height / 2));
+				
+				if(host.height > target.height)
+					top = diff;
+					
+				else if(host.height < target.height)
+					top = -diff;
 			}
 			
 			return {

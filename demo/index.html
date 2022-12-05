@@ -75,7 +75,13 @@
 					<input type="text" bs5-autocomplete ng-model="autocomplete.model" min-characters="2" datasource="autocomplete.datasource" />
 					<br><br><br><br>
 					<h4>Rating</h4>
-					<span bs5-rating max="10" ng-model="rating.model"></span>&nbsp;&nbsp;&nbsp;&nbsp;<span>Value {{rating.model}}</span>
+					<span bs5-rating max="10" ng-model="rating.model"></span>&nbsp;&nbsp;&nbsp;&nbsp;<span>Value: {{rating.model}}</span>
+					<br><br><br><br>
+					<h4>Popover</h4>
+					<button type="button" class="btn btn-primary" bs5-popover="Popover Demo" title="Popover">Popover</button>
+					<br><br><br><br>
+					<h4>Tooltip</h4>
+					<button type="button" class="btn btn-primary" bs5-tooltip="Tooltip Demo">Tooltip</button>
 				</div>
 			</div>
 		</div>
