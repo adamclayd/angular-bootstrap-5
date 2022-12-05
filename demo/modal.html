@@ -1,0 +1,16 @@
+<div class="modal-header">
+	<h5 class="modal-title">{{title}}</h5>
+	<button type="button" class="btn-close" ng-click="close()"></button>
+</div>
+<div class="modal-body">
+	<div class="row">
+		<div class="offset-2 col-10">
+			<h6>Alert Text</h6>
+			<input type="text" class="form-control" ng-model="resolver" />
+		</div>
+	</div>
+</div>
+<div class="modal-footer">
+	<button type="button" class="btn btn-success" ng-click="resolve()">Resolve</button>
+	<button type="button" class="btn btn-danger" ng-click="close()">Close</button>
+</div>
