@@ -78,14 +78,14 @@
 					<span bs5-rating max="10" ng-model="rating.model"></span>&nbsp;&nbsp;&nbsp;&nbsp;<span>Value: {{rating.model}}</span>
 					<br><br><br><br>
 					<h4>Popover</h4>
-					<button type="button" class="btn btn-primary" bs5-popover="Popover Demo" title="Popover">Popover</button>
+					<button type="button" class="btn btn-primary" bs5-popover title="Popover" template-url="popover.html" load="popover.onLoad($popover)">Popover</button>
 					<br><br><br><br>
 					<h4>Tooltip</h4>
 					<button type="button" class="btn btn-primary" bs5-tooltip="Tooltip Demo">Tooltip</button>
 				</div>
 			</div>
 		</div>
-		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+		<script src="assets/js/bootstrap.bundle.js"></script>
 		<script src="assets/js/angular.js"></script>
 		<script src="assets/js/angular-animate.js"></script>
 		<script src="assets/js/angular-bootstrap-5.js"></script>

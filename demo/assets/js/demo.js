@@ -114,5 +114,20 @@
 		$scope.rating = {
 			model: 0
 		};
+		
+		$scope.popover = {
+			onLoad: function(popover) {
+				var deferred = $q.defer();
+				popover.scope.resolver = 'Alert this text';
+				popover.scope.resolve = function() {
+					deferred.resolve(popover.scope.resolver)
+					popover.hide();
+				};
+				
+				deferred.promise.then(function(resolver) {
+					alert(resolver);
+				});
+			}
+		};
 	}]);
 })();
