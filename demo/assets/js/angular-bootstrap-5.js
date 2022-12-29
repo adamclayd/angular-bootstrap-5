@@ -54,6 +54,9 @@
 				
 				elm.addClass('collapse');
 				
+				if(scope.$eval(attrs.horizontal))
+					elm.addClass('collapse-horizontal');
+				
 				var collapse = new bootstrap.Collapse(elm[0], {toggle: false});
 				
 				elm.on('show.bs.collapse', function() {
@@ -323,23 +326,20 @@
 	
 	tabs.controller('Bs5TabsetController', ['$scope', function($scope) {
 		var ctrl = this;
-		var oldIndex = null;
 		ctrl.tabs = [];
 		
 		ctrl.select = function(index, evt) {
 			if(evt && evt.target.tagName.toLowerCase() === 'a')
 					evt.preventDefault();
 			
-			if(!destroyed && index >= 0 && index < ctrl.tabs.length) {
-				if(angular.isNumber(oldIndex)) {
-					ctrl.tabs[oldIndex].onDeselect({$tabIndex: ctrl.active, $event: evt});
-					ctrl.tabs[oldIndex].active = false;
+			if(!destroyed && angular.isNumber(index) && index !== ctrl.active && index >= 0 && index < ctrl.tabs.length) {
+				if(angular.isNumber(ctrl.active)) {
+					ctrl.tabs[ctrl.active].onDeselect({$tabIndex: ctrl.tabs[ctrl.active].index, $event: evt});
+					ctrl.tabs[ctrl.active].active = false;
 				}
 				
-				oldIndex = ctrl.active;
-				
 				ctrl.active = index;
-				ctrl.tabs[index].onSelect({$tabIndex: index, $event: evt});
+				ctrl.tabs[index].onSelect({$tabIndex: ctrl.tabs[index].index, $event: evt});
 				ctrl.tabs[index].active = true;
 			}
 		};
@@ -347,10 +347,26 @@
 		ctrl.addTab = function(tab) {
 			ctrl.tabs.push(tab);
 			
-			if(!angular.isNumber(ctrl.active) && ctrl.tabs.length === 1)
+			ctrl.tabs.sort(function(a, b) {
+				if(a.index > b.index)
+					return 1;
+				else if(a.index < b.index)
+					return -1;
+				else
+					return 0;
+			});
+			
+			var index = ctrl.findTabIndex(tab);
+			
+			if(!angular.isNumber(ctrl.active) && ctrl.tabs.length === 1) {
 				ctrl.select(0);
-			else if(ctrl.active === ctrl.tabs.length - 1)
+			}
+			else if(index >= ctrl.active) {
+				ctrl.active++;	
+			}
+			else if(ctrl.active === ctrl.tabs.length - 1) {
 				ctrl.select(ctrl.active);
+			}
 		};
 		
 		ctrl.removeTab = function(tab) {
@@ -361,6 +377,7 @@
 				
 				if(index === ctrl.active) {
 					var newIndex = ctrl.active === ctrl.tabs.length ? ctrl.active - 1 : (ctrl.active + 1) % ctrl.tabs.length;
+					ctrl.active = null;
 					ctrl.select(newIndex);
 				}
 			}
@@ -378,9 +395,14 @@
 			return index;
 		}
 		
-		$scope.$watch('tabset.active', function(val) {
-			if(angular.isDefined(val) && val !== oldIndex) {
-				ctrl.select(val);
+		$scope.$watch('tabset.active', function(val, old) {
+			if(val !== old) {
+				if(angular.isNumber(val) && val >= 0 && val < ctrl.tabs.length) {
+					ctrl.select(val);
+				}
+				else {
+					ctrl.active = old;
+				}
 			}
 		});
 		
@@ -398,7 +420,7 @@
 			replace: true,
 			bindToController: {
 				active: '=?',
-				type: '@'
+				type: '@?'
 			},
 			controller: 'Bs5TabsetController',
 			controllerAs: 'tabset',
@@ -429,6 +451,16 @@
 			controller: function() {},
 			controllerAs: 'tab',
 			link: function(scope, elm, attrs, ctrl, transclude) {
+				var index = null;
+				var nodes = elm.parent().querySelectorAll('.nav-item');
+				
+				for(var i = 0; i < nodes.length; i++) {
+					if(elm[0] === nodes[i])
+						index = i;
+				}
+				
+				scope.index = index;
+				
 				scope.disabled = false;
 				if(attrs.disable) {
 					scope.$parent.$watch($parse(attrs.disable), function(value) {
@@ -1646,7 +1678,7 @@
 					'</div>' +
 					'<div class="row">' +
 						'<div class="col-12">' +
-							'<table class="table">' +
+							'<table class="table table-bordered">' +
 								'<tbody>' +
 									'<tr>' +
 										'<td class="text-center"><strong>Sun</strong></td>' +
