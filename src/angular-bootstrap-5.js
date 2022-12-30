@@ -24,6 +24,10 @@
 		'bs5.position'
 	]);
 	
+	bootstrap5.run(['$animate', function($animate) {
+		$animate.enabled(true);
+	}]);
+	
 	var templates = angular.module('bs5.templates', [
 		'angular/bootstrap5/templates/accordion/accordion.html', 
 		'angular/bootstrap5/templates/accordion/accordion-group.html',
@@ -353,11 +357,8 @@
 			
 			var index = ctrl.findTabIndex(tab);
 			
-			if(!angular.isNumber(ctrl.active) && ctrl.tabs.length === 1) {
+			if(!angular.isNumber(ctrl.active)) {
 				ctrl.select(0);
-			}
-			else if(ctrl.active === ctrl.tabs.length - 1) {
-				ctrl.select(ctrl.active);
 			}
 		};
 		
@@ -405,7 +406,6 @@
 			transclude: true,
 			replace: true,
 			bindToController: {
-				active: '=?',
 				type: '@'
 			},
 			controller: 'Bs5TabsetController',
@@ -522,7 +522,7 @@
 						to: {
 							opacity: 1
 						},
-						duration: 0.6
+						duration: 0.7
 					}).start().finally(done);
 				}
 				else {
@@ -1764,7 +1764,7 @@
 	angular.module('angular/bootstrap5/templates/rating/rating.html', []).run(['$templateCache', function($templateCache) {
 		$templateCache.put(
 			'angular/bootstrap5/templates/rating/rating.html',
-			'<i class="bi {{$index < value ? stateOnIcon : stateOffIcon}}" ng-repeat="r in range" ng-mouseenter="enter($index + 1)" ng-click="rate($index + 1)" ng-mouseleave="leave()"></i>'
+			'<i class="bs5-rating-star bi {{$index < value ? stateOnIcon : stateOffIcon}}" ng-repeat="r in range" ng-mouseenter="enter($index + 1)" ng-click="rate($index + 1)" ng-mouseleave="leave()"></i>'
 		);
 	}]);
 	
