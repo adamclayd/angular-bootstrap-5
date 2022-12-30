@@ -4,11 +4,6 @@
 Directives and services that work with Bootstrap 5. 
 It has been tested and works with Bootstrap v5.1.3.
 
-
-
-## Live Demo
-[See the demo from the repo](http://3.86.238.50/angular-bootstrap-5/demo/index.html)
-
 ## Setup
 
 You have to include the Bootstrap 5 javascript file before you include ngBootstrap5.
