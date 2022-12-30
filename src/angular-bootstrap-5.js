@@ -54,6 +54,9 @@
 				
 				elm.addClass('collapse');
 				
+				if(scope.$eval(attrs.horizontal))
+					elm.addClass('collapse-horizontal');
+				
 				var collapse = new bootstrap.Collapse(elm[0], {toggle: false});
 				
 				elm.on('show.bs.collapse', function() {
@@ -323,34 +326,39 @@
 	
 	tabs.controller('Bs5TabsetController', ['$scope', function($scope) {
 		var ctrl = this;
-		var oldIndex = null;
+		var ndx = null;
 		ctrl.tabs = [];
 		
 		ctrl.select = function(index, evt) {
 			if(evt && evt.target.tagName.toLowerCase() === 'a')
 					evt.preventDefault();
 			
-			if(!destroyed && index >= 0 && index < ctrl.tabs.length) {
-				if(angular.isNumber(oldIndex)) {
-					ctrl.tabs[oldIndex].onDeselect({$tabIndex: ctrl.active, $event: evt});
-					ctrl.tabs[oldIndex].active = false;
+			if(!destroyed) {
+				if(angular.isNumber(ndx) && ctrl.tabs[ndx]) {
+					ctrl.tabs[ndx].onDeselect({$event: evt});
+					ctrl.tabs[ndx].active = false;
 				}
 				
-				oldIndex = ctrl.active;
+				ndx = ctrl.active = index;
 				
-				ctrl.active = index;
-				ctrl.tabs[index].onSelect({$tabIndex: index, $event: evt});
-				ctrl.tabs[index].active = true;
+				if(angular.isNumber(index) && ctrl.tabs[index]) {
+					ctrl.tabs[index].onSelect({$event: evt});
+					ctrl.tabs[index].active = true;
+				}
 			}
 		};
 		
 		ctrl.addTab = function(tab) {
 			ctrl.tabs.push(tab);
 			
-			if(!angular.isNumber(ctrl.active) && ctrl.tabs.length === 1)
+			var index = ctrl.findTabIndex(tab);
+			
+			if(!angular.isNumber(ctrl.active) && ctrl.tabs.length === 1) {
 				ctrl.select(0);
-			else if(ctrl.active === ctrl.tabs.length - 1)
+			}
+			else if(ctrl.active === ctrl.tabs.length - 1) {
 				ctrl.select(ctrl.active);
+			}
 		};
 		
 		ctrl.removeTab = function(tab) {
@@ -361,6 +369,7 @@
 				
 				if(index === ctrl.active) {
 					var newIndex = ctrl.active === ctrl.tabs.length ? ctrl.active - 1 : (ctrl.active + 1) % ctrl.tabs.length;
+					ndx = ctrl.active = null;
 					ctrl.select(newIndex);
 				}
 			}
@@ -378,13 +387,12 @@
 			return index;
 		}
 		
-		$scope.$watch('tabset.active', function(val) {
-			if(angular.isDefined(val) && val !== oldIndex) {
+		$scope.$watch('tabset.active', function(val, old) {
+			if(val !== old)
 				ctrl.select(val);
-			}
 		});
 		
-		var destroyed;
+		var destroyed = false;
 		$scope.$on('$destroy', function() {
 			destroyed = true;
 		});
@@ -499,7 +507,30 @@
 				});
 			}
 		}
-	})
+	});
+	
+	tabs.animation('.bs5-tab-pane-fade-in', ['$injector',  function($injector) {
+		var $animateCss = $injector.has('$animateCss') ? $injector.get('$animateCss') : null;
+		
+		return {
+			addClass: function(element, className, done) {
+				if($animateCss && className === 'active') {
+					$animateCss(element, {
+						from: {
+							opacity: 0
+						},
+						to: {
+							opacity: 1
+						},
+						duration: 0.6
+					}).start().finally(done);
+				}
+				else {
+					done();
+				}
+			}
+		}
+	}]);
 	
 	
 	angular.module('angular/bootstrap5/templates/tabs/tabset.html', []).run(['$templateCache', function($templateCache) {
@@ -510,7 +541,7 @@
 					'<ul class="nav" ng-class="{\'flex-column\': vertical, \'me-3\': vertical, \'nav-pills\': vertical || tabset.type === \'pills\', \'mb-3\': !vertical, \'nav-tabs\': !vertical && (tabset.type === \'tabs\' || !tabset.type), \'nav-justified\': justified}" ng-transclude></ul>' +
 				'</nav>' +
 				'<div class="tab-content">' +
-					'<div class="tab-pane fade" ng-repeat="tab in tabset.tabs" ng-class="{show: tabset.active === $index, active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
+					'<div class="bs5-tab-pane-fade-in tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
 				'</div>' +
 			'</div>'
 		);
@@ -1646,7 +1677,7 @@
 					'</div>' +
 					'<div class="row">' +
 						'<div class="col-12">' +
-							'<table class="table">' +
+							'<table class="table table-bordered">' +
 								'<tbody>' +
 									'<tr>' +
 										'<td class="text-center"><strong>Sun</strong></td>' +

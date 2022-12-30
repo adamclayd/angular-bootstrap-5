@@ -326,43 +326,35 @@
 	
 	tabs.controller('Bs5TabsetController', ['$scope', function($scope) {
 		var ctrl = this;
+		var ndx = null;
 		ctrl.tabs = [];
 		
 		ctrl.select = function(index, evt) {
 			if(evt && evt.target.tagName.toLowerCase() === 'a')
 					evt.preventDefault();
 			
-			if(!destroyed && angular.isNumber(index) && index !== ctrl.active && index >= 0 && index < ctrl.tabs.length) {
-				if(angular.isNumber(ctrl.active)) {
-					ctrl.tabs[ctrl.active].onDeselect({$tabIndex: ctrl.tabs[ctrl.active].index, $event: evt});
-					ctrl.tabs[ctrl.active].active = false;
+			if(!destroyed) {
+				if(angular.isNumber(ndx) && ctrl.tabs[ndx]) {
+					ctrl.tabs[ndx].onDeselect({$event: evt});
+					ctrl.tabs[ndx].active = false;
 				}
 				
-				ctrl.active = index;
-				ctrl.tabs[index].onSelect({$tabIndex: ctrl.tabs[index].index, $event: evt});
-				ctrl.tabs[index].active = true;
+				ndx = ctrl.active = index;
+				
+				if(angular.isNumber(index) && ctrl.tabs[index]) {
+					ctrl.tabs[index].onSelect({$event: evt});
+					ctrl.tabs[index].active = true;
+				}
 			}
 		};
 		
 		ctrl.addTab = function(tab) {
 			ctrl.tabs.push(tab);
 			
-			ctrl.tabs.sort(function(a, b) {
-				if(a.index > b.index)
-					return 1;
-				else if(a.index < b.index)
-					return -1;
-				else
-					return 0;
-			});
-			
 			var index = ctrl.findTabIndex(tab);
 			
 			if(!angular.isNumber(ctrl.active) && ctrl.tabs.length === 1) {
 				ctrl.select(0);
-			}
-			else if(index >= ctrl.active) {
-				ctrl.active++;	
 			}
 			else if(ctrl.active === ctrl.tabs.length - 1) {
 				ctrl.select(ctrl.active);
@@ -377,7 +369,7 @@
 				
 				if(index === ctrl.active) {
 					var newIndex = ctrl.active === ctrl.tabs.length ? ctrl.active - 1 : (ctrl.active + 1) % ctrl.tabs.length;
-					ctrl.active = null;
+					ndx = ctrl.active = null;
 					ctrl.select(newIndex);
 				}
 			}
@@ -396,17 +388,11 @@
 		}
 		
 		$scope.$watch('tabset.active', function(val, old) {
-			if(val !== old) {
-				if(angular.isNumber(val) && val >= 0 && val < ctrl.tabs.length) {
-					ctrl.select(val);
-				}
-				else {
-					ctrl.active = old;
-				}
-			}
+			if(val !== old)
+				ctrl.select(val);
 		});
 		
-		var destroyed;
+		var destroyed = false;
 		$scope.$on('$destroy', function() {
 			destroyed = true;
 		});
@@ -420,7 +406,7 @@
 			replace: true,
 			bindToController: {
 				active: '=?',
-				type: '@?'
+				type: '@'
 			},
 			controller: 'Bs5TabsetController',
 			controllerAs: 'tabset',
@@ -451,16 +437,6 @@
 			controller: function() {},
 			controllerAs: 'tab',
 			link: function(scope, elm, attrs, ctrl, transclude) {
-				var index = null;
-				var nodes = elm.parent().querySelectorAll('.nav-item');
-				
-				for(var i = 0; i < nodes.length; i++) {
-					if(elm[0] === nodes[i])
-						index = i;
-				}
-				
-				scope.index = index;
-				
 				scope.disabled = false;
 				if(attrs.disable) {
 					scope.$parent.$watch($parse(attrs.disable), function(value) {
@@ -531,7 +507,30 @@
 				});
 			}
 		}
-	})
+	});
+	
+	tabs.animation('.bs5-tab-pane-fade-in', ['$injector',  function($injector) {
+		var $animateCss = $injector.has('$animateCss') ? $injector.get('$animateCss') : null;
+		
+		return {
+			addClass: function(element, className, done) {
+				if($animateCss && className === 'active') {
+					$animateCss(element, {
+						from: {
+							opacity: 0
+						},
+						to: {
+							opacity: 1
+						},
+						duration: 0.6
+					}).start().finally(done);
+				}
+				else {
+					done();
+				}
+			}
+		}
+	}]);
 	
 	
 	angular.module('angular/bootstrap5/templates/tabs/tabset.html', []).run(['$templateCache', function($templateCache) {
@@ -542,7 +541,7 @@
 					'<ul class="nav" ng-class="{\'flex-column\': vertical, \'me-3\': vertical, \'nav-pills\': vertical || tabset.type === \'pills\', \'mb-3\': !vertical, \'nav-tabs\': !vertical && (tabset.type === \'tabs\' || !tabset.type), \'nav-justified\': justified}" ng-transclude></ul>' +
 				'</nav>' +
 				'<div class="tab-content">' +
-					'<div class="tab-pane fade" ng-repeat="tab in tabset.tabs" ng-class="{show: tabset.active === $index, active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
+					'<div class="bs5-tab-pane-fade-in tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
 				'</div>' +
 			'</div>'
 		);
