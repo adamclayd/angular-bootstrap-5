@@ -1,5 +1,4 @@
-# ngBootstrap5
-
+# Bootstrap 5 for AngularJS v1.8.2
 
 Directives and services that work with Bootstrap 5. 
 It has been tested and works with Bootstrap v5.1.3.
@@ -23,24 +22,19 @@ Set to `false` to expand the collapse.
 
 ###### Example
 ```html
-...
 <div ng-controller="MainController">
 	<button type="button" class="btn btn-primary" ng-click="collapsed = !collapsed">Toggle Section</button>
 	<div bs5-collapse="collapsed">
 		... collapsed content ...
 	</div>
 </div>
-...
-
 ```
 
 ```javascript
-...
+
 module.controller('MainController', ['$scope', function($scope) {
 	$scope.collapsed = true;
 }]);
-...
-
 ```
 
 ## Accordion
@@ -112,19 +106,13 @@ Attributes
 ###### Example
 
 ```html
-...
-
 <div ng-controller="MainController">
 	<bs5-progressbar value="progress" display-percent="true"></bs5-progressbar>
 	<button type="button" class="btn btn-primary" ng-click="setProgress()">Randomize Progress</button>
 </div>
-
-...
 ```
 
 ```javascript
-...
-
 module.controller('MainController', ['$scope', function($scope) {
 	$scope.setProgress = function() {
 		$scope.progress = Math.floor((Math.random() * 100) + 1);
@@ -132,8 +120,6 @@ module.controller('MainController', ['$scope', function($scope) {
 	
 	$scope.setProgress();
 }]);
-
-...
 ```
 
 ## Tabs
@@ -220,8 +206,6 @@ Returns
 
 ###### Example
 ```html
-...
-
 <div ng-controller="MainController">
 	<button type="button" class="btn btn-primary" ng-click="openModal()">Open Modal</button>
 </div>
@@ -237,13 +221,9 @@ Returns
 		<button type="button" class="btn btn-danger" ng-clicck="close()">Close</div>
 	</div>
 </script>
-
-...
 ```
 
 ```javascript
-...
-
 module.controller('MainController', ['$scope', '$bs5Modal', function($scope, $bs5Modal) {
 	$scope.openModal = function() {
 		var modal = $bs5Modal({
@@ -269,8 +249,6 @@ module.controller('MainController', ['$scope', '$bs5Modal', function($scope, $bs
 		});
 	};
 }]);
-
-...
 ````
 
 
@@ -424,18 +402,12 @@ Attributes
 ###### Example
 
 ```html
-...
-
 <div ng-controller="MainController">
 	<bs5-pagination current-page="pager.page" page-size="pager.pageSize" number-items="pager.numItems" page-change="pageChange($page, $pageSize)"></bs5-pagination>
 </div>
-
-...
 ```
 
 ```javascript
-...
-
 module.controller('MainController', ['$scope', function($scope) {
 	$scope.pager = {
 		page: 1,
@@ -450,7 +422,6 @@ module.controller('MainController', ['$scope', function($scope) {
 		console.log('Page Size: ' + pageSize);
 	};
 }]);
-...
 ```
 
 ## Datepicker
@@ -467,23 +438,15 @@ Attributes
 
 ###### Example
 ```html
-...
-
 <div ng-controller="MainController">
 	<input ng-model="model" bs5-datepicker format="mm/dd/yyyy" />
 </div>
-
-...
 ```
 
 ```javascript
-...
-
 module.controller('MainController', ['$scope', function($scope) {
 	$scope.model = null;
 }]);
-
-...
 ```
 
 ## Rating
@@ -512,22 +475,15 @@ Attributes
 ###### Example
 
 ```html
-...
-
 <div ng-controller="MainController" >
 	<span bs5-rating ng-model="model" max="10"></span>
 </div>
-...
 ```
 
 ```javascript
-...
-
 module.controller('MainController', ['$scope', function($scope) {
 	$scope.model = 7;
 }]);
-
-...
 ```
 
 ## Autocomplete
@@ -563,23 +519,15 @@ Attributes
 ###### Example
 
 ```html
-...
-
 <div ng-controller="MainController">
 	<input type="text" ng-model="model" bs5-autocomplete min-characters="2" datasource="datasource" />
 </div>
-
-...
 ```
 
 ```javascript
-...
-
 module.controller('MainController', ['$scope', function($scope) {
 	$scope.model = null;
 	
 	$scope.datasource = ['Foo', 'Bar', 'Baz', 'Foobaz', 'Barfoo', 'Foobar', 'Bazfoo'];
 }]);
-
-...
 ```
