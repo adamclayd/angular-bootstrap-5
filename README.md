@@ -8,6 +8,17 @@ It has been tested and works with Bootstrap v5.1.3.
 You have to include the Bootstrap 5 javascript file before you include ngBootstrap5.
 Include the ngBootstrap5 module in your main application module:
 
+'''html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.css" />
+```
+
+'''htm;
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-animate/1.8.3/angular-animate.min.js"></script>
+<script src="js/angular-bootstrap-5.js"></script>
+```
+
 ```javascript
 var module = angular.module('app', ['ngBootstrap5']);
 ```
