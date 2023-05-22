@@ -14,7 +14,7 @@ Include the ngBootstrap5 module in your main application module:
 <link rel="stylesheet" href="css/angular-bootstrap-5.css" />
 ```
 
-```html;
+```html
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-animate/1.8.3/angular-animate.min.js"></script>
