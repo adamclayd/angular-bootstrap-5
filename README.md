@@ -10,6 +10,8 @@ Include the ngBootstrap5 module in your main application module:
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.css" />
+<link rel="stylesheet" href="css/bootstrap-icons/bootstrap-icons.css" />
+<link rel="stylesheet" href="css/angular-bootstrap-5.css" />
 ```
 
 ```html;
