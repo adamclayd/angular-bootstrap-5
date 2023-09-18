@@ -2225,7 +2225,7 @@ angular.module('bs5.tabs', ['bs5.dom'])
     }])
 
     
-    tabs.directive('bs5Tabset', function() {
+    .directive('bs5Tabset', function() {
         return {
             restrict: 'E',
             transclude: true,

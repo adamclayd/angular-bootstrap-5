@@ -113,7 +113,7 @@ angular.module('bs5.tabs', ['bs5.dom'])
      *
      *		placement:     <'top' | 'left' | 'bottom' | 'right'>     where the tabs are to be placed (note: if set to 'left' or 'right' then type will be set to 'pills'
      */
-    tabs.directive('bs5Tabset', function() {
+    .directive('bs5Tabset', function() {
         return {
             restrict: 'E',
             transclude: true,
