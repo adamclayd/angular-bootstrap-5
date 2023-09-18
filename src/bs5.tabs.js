@@ -4,7 +4,7 @@
  * Requires:
  *      ngAnimate
  */
-angular.module('bs5.tabs', ['ngAnimate'])
+angular.module('bs5.tabs', ['bs5.dom'])
 
     /**
      * Controller: Bs5TabsetController
@@ -158,7 +158,7 @@ angular.module('bs5.tabs', ['ngAnimate'])
      * 				... Tab Content ...
      * 			</bs5-tab>
      */
-    .directive('bs5Tab', ['$parse', function($parse) {
+    .directive('bs5Tab', ['$parse', '$bs5DOM', function($parse, $bs5DOM) {
         return {
             require: '^bs5Tabset',
             restrict: 'E',
@@ -182,9 +182,24 @@ angular.module('bs5.tabs', ['ngAnimate'])
                     });
                 }
 
+                let tabPane = null;
+                $timeout(function() {
+                    let children = elm.parent().children();
+
+                    let i;
+                    for(i = 0; i < children.length; i++) {
+                        if(children[i] === elm[0])
+                            break;
+                    }
+
+                    tabPane = elm.parent().parent()[0].querySelectorAll('.tab-pane')[i];
+                }, 500);
+
                 scope.select = function(evt) {
                     if(!scope.disabled) {
                         ctrl.select(ctrl.findTabIndex(scope), evt);
+
+                        $bs5DOM.fade(tabPane);
                     }
                 }
 
@@ -270,10 +285,10 @@ angular.module('bs5.tabs', ['ngAnimate'])
         $templateCache.put(
             'angular/bootstrap5/templates/tabs/tabset-top.html',
             '<div class="bs5-tabset-top">' +
-            '<nav class="nav nav-{{type}} mb-2" ng-class="{\'nav-justified\': justified, \'nav-fill\': fill}" ng-transclude></nav>' +
-            '<div class="tab-content">' +
-            '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
-            '</div>' +
+                '<nav class="nav nav-{{type}} mb-2" ng-class="{\'nav-justified\': justified, \'nav-fill\': fill}" ng-transclude></nav>' +
+                '<div class="tab-content">' +
+                    '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
+                '</div>' +
             '</div>'
         );
 
@@ -285,10 +300,10 @@ angular.module('bs5.tabs', ['ngAnimate'])
         $templateCache.put(
             'angular/bootstrap5/templates/tabs/tabset-left.html',
             '<div class="align-items-start bs5-tabset-left">' +
-            '<div class="nav flex-column nav-pills float-start me-3" ng-transclude></div>' +
-            '<div class="tab-content">' +
-            '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
-            '</div>' +
+                '<div class="nav flex-column nav-pills float-start me-3" ng-transclude></div>' +
+                '<div class="tab-content">' +
+                    '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
+                '</div>' +
             '</div>'
         );
 
@@ -300,20 +315,20 @@ angular.module('bs5.tabs', ['ngAnimate'])
         $templateCache.put(
             'angular/bootstrap5/templates/tabs/tabset-right.html',
             '<div class="align-items-start bs5-tabset-right">' +
-            '<div class="tab-content float-start">' +
-            '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
-            '</div>' +
-            '<div class="nav flex-column nav-pills float-start ms-3" ng-transclude></div>' +
+                '<div class="tab-content float-start">' +
+                    '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
+                '</div>' +
+                '<div class="nav flex-column nav-pills ms-3" ng-transclude></div>' +
             '</div>'
         );
 
         $templateCache.put(
             'angular/bootstrap5/templates/tabs/tabset-bottom.html',
             '<div class="bs5-tabset-bottom">' +
-            '<div class="tab-content">' +
-            '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
-            '</div>' +
-            '<nav class="nav nav-{{type}} mt-2" ng-class="{\'nav-justified\': justified, \'nav-fill\': fill}" ng-transclude></nav>' +
+                '<div class="tab-content">' +
+                    '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
+                '</div>' +
+                '<nav class="nav nav-{{type}} mt-2" ng-class="{\'nav-justified\': justified, \'nav-fill\': fill}" ng-transclude></nav>' +
             '</div>'
         );
     }]);

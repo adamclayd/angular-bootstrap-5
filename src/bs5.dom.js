@@ -431,14 +431,6 @@ angular.module('bs5.dom', [])
                 }
             };
 
-
-            !angular.isElement(host) ? throw new TypeError('Parameter `host` is not of type angular.element') :
-                (!angular.isElement(tip) ? throw new TypeError('Parameter `tip` is not of type angular.element') :
-                    (!angular.isElement(container) ? throw new TypeError('Parameter `container` is not of type angular.element') : null));
-
-            if(!tip.hasClass('popover') && !tip.hasClass('tooltip'))
-                throw new DOMException('Parameter `tip` is not a tooltip or a popover');
-
             let isPopover = tip.hasClass('popover');
             let place = /^(left|right|top|bottom)$/.test(placement) ? placement : (isPopover ? 'right' : 'top');
 

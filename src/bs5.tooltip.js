@@ -33,11 +33,10 @@ angular.module('bs5.tooltip', ['bs5.dom'])
             restrict: 'A',
             link: function(scope, elm, attrs) {
                 let deferred = $q.defer();
-
-                let offset = attrs.offset ? scope.$eval(attrs.offset) : [0, 0];
-                let delay = !isNaN(attrs.delay) ? scope.$eval(attrs.delay) : 0;
-                let animate = attrs.animate ? scope.$eval(attrs.animate) : true;
-                let html = attrs.html ? scope.$eval(attrs.html) : false;
+                let offset = /^\[ *?\d+?, *?\d+? *?\]$/.test(attrs.offset) ? scope.$eval(attrs.offset) : [0, 0];
+                let delay = $scope.$eval(attrs.delay);
+                let animate = scope.$eval(attrs.animate);
+                let html = scope.$eval(attrs.html);
                 let placement = attrs.placement === 'left' || attrs.placement === 'bottom' || attrs.placement === 'right' || attrs.placement === 'top' ? attrs.placement : 'top';
                 let fp = scope.$eval(attrs.fallbackPlacements);
                 fp = angular.isArray(fp) ? fp : ['left', 'right', 'top', 'bottom'];

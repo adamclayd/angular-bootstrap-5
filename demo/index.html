@@ -1,0 +1,29 @@
+<html lang="en" ng-app="demo">
+	<head>
+    	<meta charset="UTF-8">
+    	<title>BootStrap 5 for Angular JS </title>
+		<link rel="stylesheet" href="../lib/css/bootstrap.min.css">
+		<link rel="stylesheet" href="../lib/css/bootstrap-icons/bootstrap-icons.css">
+	</head>
+	<body>
+		<div class="container" ng-controller="MainController">
+			<div class="row">
+				<div class="col-8">
+					<div class="row mb-2">
+						<button type="button" class="btn btn-sm btn-primary" ng-click="collapse.toggle()">Toggle</button>
+						<div class="form-check form-check-inline">
+							<input  class="form-check-input" type="checkbox" ng-model="collapse.horziontal">
+							<label class="form-check-label">Animate Horizontal</label>
+						</div>
+						<div bs5-collapse="collapse.collapsed">
+							{{faker.lorem.paragraph(10)}}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="../lib/js/angular.js"></script>
+		<script src="../build/angularjs-bootstrap-5.js"></script>
+		<scipt src="demo.js" type="module"></scipt>
+	</body>
+</html>

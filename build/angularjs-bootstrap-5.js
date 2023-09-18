@@ -192,7 +192,6 @@ angular.module('bs5.alert', [])
         };
     })
 
-    
     .run(['$templateCache', function($templateCache) {
         $templateCache.put(
             'angular/bootstrap5/templates/alert/alert.html',
@@ -1155,14 +1154,6 @@ angular.module('bs5.dom', [])
                 }
             };
 
-
-            !angular.isElement(host) ? throw new TypeError('Parameter `host` is not of type angular.element') :
-                (!angular.isElement(tip) ? throw new TypeError('Parameter `tip` is not of type angular.element') :
-                    (!angular.isElement(container) ? throw new TypeError('Parameter `container` is not of type angular.element') : null));
-
-            if(!tip.hasClass('popover') && !tip.hasClass('tooltip'))
-                throw new DOMException('Parameter `tip` is not a tooltip or a popover');
-
             let isPopover = tip.hasClass('popover');
             let place = /^(left|right|top|bottom)$/.test(placement) ? placement : (isPopover ? 'right' : 'top');
 
@@ -2062,7 +2053,7 @@ angular.module('bs5.progressbar', [])
                             fill: 'forwards',
                             delay: 0,
                             endDelay: 0
-                        })
+                        });
                     }
                 });
             }
@@ -2087,17 +2078,16 @@ angular.module('bs5.rating', [])
     .directive('bs5Rating', function() {
         return {
             restrict: 'A',
-            require: ['?^^form', 'ngModel'],
+            require: 'ngModel',
             scope: {
                 readonly: '=?',
-                onRatingChange: '&?'
+                onRatingChange: '&?',
+                color: '@?'
             },
             templateUrl: function(elm, attrs) {
                 return attrs.templateurl || 'angular/bootstrap5/templates/rating/rating.html'
             },
-            link: function(scope, elm, attrs, ctrls) {
-                let form = ctrls[0];
-                let ctrl = ctrls[1];
+            link: function(scope, elm, attrs, ctrl) {
 
                 let max = scope.$eval(attrs.number) || 5;
                 let enableReset = angular.isDefined(attrs.enableReset) ? scope.$eval(attrs.enableReset) : true;
@@ -2147,18 +2137,15 @@ angular.module('bs5.rating', [])
             }
         };
     })
-
-
-    
     .run(['$templateCache', function($templateCache) {
         $templateCache.put(
             'angular/bootstrap5/templates/rating/rating.html',
-            '<i class="bi {{$index < value ? stateOnIcon : stateOffIcon}}" ng-class="{\'bs5-pointer\': !readonly}" ng-repeat="r in range" ng-mouseenter="enter($index + 1)" ng-click="rate($index + 1)" ng-mouseleave="leave()"></i>'
+            '<i class="bi {{$index < value ? stateOnIcon : stateOffIcon}}" ng-style="{cursor: readonly ? \'inheriit\' : \'pointer\', color: color || \'inherit\', font-size: size || \'inherit\'}" ng-repeat="r in range" ng-mouseenter="enter($index + 1)" ng-click="rate($index + 1)" ng-mouseleave="leave()"></i>'
         );
     }]);
 
 
-angular.module('bs5.tabs', ['ngAnimate'])
+angular.module('bs5.tabs', ['bs5.dom'])
 
     
     .controller('Bs5TabsetController', ['$scope', function($scope) {
@@ -2257,7 +2244,7 @@ angular.module('bs5.tabs', ['ngAnimate'])
     })
 
     
-    .directive('bs5Tab', ['$parse', function($parse) {
+    .directive('bs5Tab', ['$parse', '$bs5DOM', function($parse, $bs5DOM) {
         return {
             require: '^bs5Tabset',
             restrict: 'E',
@@ -2281,9 +2268,24 @@ angular.module('bs5.tabs', ['ngAnimate'])
                     });
                 }
 
+                let tabPane = null;
+                $timeout(function() {
+                    let children = elm.parent().children();
+
+                    let i;
+                    for(i = 0; i < children.length; i++) {
+                        if(children[i] === elm[0])
+                            break;
+                    }
+
+                    tabPane = elm.parent().parent()[0].querySelectorAll('.tab-pane')[i];
+                }, 500);
+
                 scope.select = function(evt) {
                     if(!scope.disabled) {
                         ctrl.select(ctrl.findTabIndex(scope), evt);
+
+                        $bs5DOM.fade(tabPane);
                     }
                 }
 
@@ -2369,10 +2371,10 @@ angular.module('bs5.tabs', ['ngAnimate'])
         $templateCache.put(
             'angular/bootstrap5/templates/tabs/tabset-top.html',
             '<div class="bs5-tabset-top">' +
-            '<nav class="nav nav-{{type}} mb-2" ng-class="{\'nav-justified\': justified, \'nav-fill\': fill}" ng-transclude></nav>' +
-            '<div class="tab-content">' +
-            '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
-            '</div>' +
+                '<nav class="nav nav-{{type}} mb-2" ng-class="{\'nav-justified\': justified, \'nav-fill\': fill}" ng-transclude></nav>' +
+                '<div class="tab-content">' +
+                    '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
+                '</div>' +
             '</div>'
         );
 
@@ -2384,10 +2386,10 @@ angular.module('bs5.tabs', ['ngAnimate'])
         $templateCache.put(
             'angular/bootstrap5/templates/tabs/tabset-left.html',
             '<div class="align-items-start bs5-tabset-left">' +
-            '<div class="nav flex-column nav-pills float-start me-3" ng-transclude></div>' +
-            '<div class="tab-content">' +
-            '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
-            '</div>' +
+                '<div class="nav flex-column nav-pills float-start me-3" ng-transclude></div>' +
+                '<div class="tab-content">' +
+                    '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
+                '</div>' +
             '</div>'
         );
 
@@ -2399,20 +2401,20 @@ angular.module('bs5.tabs', ['ngAnimate'])
         $templateCache.put(
             'angular/bootstrap5/templates/tabs/tabset-right.html',
             '<div class="align-items-start bs5-tabset-right">' +
-            '<div class="tab-content float-start">' +
-            '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
-            '</div>' +
-            '<div class="nav flex-column nav-pills float-start ms-3" ng-transclude></div>' +
+                '<div class="tab-content float-start">' +
+                    '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
+                '</div>' +
+                '<div class="nav flex-column nav-pills ms-3" ng-transclude></div>' +
             '</div>'
         );
 
         $templateCache.put(
             'angular/bootstrap5/templates/tabs/tabset-bottom.html',
             '<div class="bs5-tabset-bottom">' +
-            '<div class="tab-content">' +
-            '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
-            '</div>' +
-            '<nav class="nav nav-{{type}} mt-2" ng-class="{\'nav-justified\': justified, \'nav-fill\': fill}" ng-transclude></nav>' +
+                '<div class="tab-content">' +
+                    '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
+                '</div>' +
+                '<nav class="nav nav-{{type}} mt-2" ng-class="{\'nav-justified\': justified, \'nav-fill\': fill}" ng-transclude></nav>' +
             '</div>'
         );
     }]);
@@ -2426,11 +2428,10 @@ angular.module('bs5.tooltip', ['bs5.dom'])
             restrict: 'A',
             link: function(scope, elm, attrs) {
                 let deferred = $q.defer();
-
-                let offset = attrs.offset ? scope.$eval(attrs.offset) : [0, 0];
-                let delay = !isNaN(attrs.delay) ? scope.$eval(attrs.delay) : 0;
-                let animate = attrs.animate ? scope.$eval(attrs.animate) : true;
-                let html = attrs.html ? scope.$eval(attrs.html) : false;
+                let offset = /^\[ *?\d+?, *?\d+? *?\]$/.test(attrs.offset) ? scope.$eval(attrs.offset) : [0, 0];
+                let delay = $scope.$eval(attrs.delay);
+                let animate = scope.$eval(attrs.animate);
+                let html = scope.$eval(attrs.html);
                 let placement = attrs.placement === 'left' || attrs.placement === 'bottom' || attrs.placement === 'right' || attrs.placement === 'top' ? attrs.placement : 'top';
                 let fp = scope.$eval(attrs.fallbackPlacements);
                 fp = angular.isArray(fp) ? fp : ['left', 'right', 'top', 'bottom'];

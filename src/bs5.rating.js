@@ -21,21 +21,24 @@ angular.module('bs5.rating', [])
      *
      *  	on-rating-change:    <expression>    the event handler to call when the rating is changed. $rating which is the
      *                                           value of the rating is provided to the expression
+     *
+     *      color:               <string>        change the color of the stars. can be any css color value
+     *
+     *      size:                <string>        change the size of the stars. can be any css font value;
      */
     .directive('bs5Rating', function() {
         return {
             restrict: 'A',
-            require: ['?^^form', 'ngModel'],
+            require: 'ngModel',
             scope: {
                 readonly: '=?',
-                onRatingChange: '&?'
+                onRatingChange: '&?',
+                color: '@?'
             },
             templateUrl: function(elm, attrs) {
                 return attrs.templateurl || 'angular/bootstrap5/templates/rating/rating.html'
             },
-            link: function(scope, elm, attrs, ctrls) {
-                let form = ctrls[0];
-                let ctrl = ctrls[1];
+            link: function(scope, elm, attrs, ctrl) {
 
                 let max = scope.$eval(attrs.number) || 5;
                 let enableReset = angular.isDefined(attrs.enableReset) ? scope.$eval(attrs.enableReset) : true;
@@ -85,14 +88,9 @@ angular.module('bs5.rating', [])
             }
         };
     })
-
-
-    /**
-     * Rating Template
-     */
     .run(['$templateCache', function($templateCache) {
         $templateCache.put(
             'angular/bootstrap5/templates/rating/rating.html',
-            '<i class="bi {{$index < value ? stateOnIcon : stateOffIcon}}" ng-class="{\'bs5-pointer\': !readonly}" ng-repeat="r in range" ng-mouseenter="enter($index + 1)" ng-click="rate($index + 1)" ng-mouseleave="leave()"></i>'
+            '<i class="bi {{$index < value ? stateOnIcon : stateOffIcon}}" ng-style="{cursor: readonly ? \'inheriit\' : \'pointer\', color: color || \'inherit\', font-size: size || \'inherit\'}" ng-repeat="r in range" ng-mouseenter="enter($index + 1)" ng-click="rate($index + 1)" ng-mouseleave="leave()"></i>'
         );
     }]);
