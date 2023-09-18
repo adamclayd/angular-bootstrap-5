@@ -1,7 +1,7 @@
 /**
  * Module: bs5.progressbar
  */
-angular.module('bs5.progressbar', [])
+angular.module('bs5.progressbar', ['bs5.dom'])
 
     /**
      * Directive: bs5Progressbar
@@ -11,8 +11,7 @@ angular.module('bs5.progressbar', [])
      * 		value:          <number>     the progress value;
      * 	    display-percent <boolean>    if true the percentage will be displayed in the progressbar
      */
-    .directive('bs5Progressbar', ['$animate', '$injector', function($animate, $injector) {
-        let $animateCss = $injector.has('$animateCss') ? $injector.get('$animateCss') : null;
+    .directive('bs5Progressbar', ['$bs5DOM', function($bs5DOM) {
 
         return {
             restrict: 'E',
@@ -25,7 +24,7 @@ angular.module('bs5.progressbar', [])
                 statusText: '@?',
                 countCompleted: '=?',
                 countTotal: '=?',
-                countType: '@'
+                countType: '@?'
             },
             templateUrl: function(elm, attrs) {
                 return attrs.templateUrl || 'angular/bootstrap5/templates/progressbar/progressbar.html';
@@ -49,18 +48,10 @@ angular.module('bs5.progressbar', [])
                             scope.value = 100;
 
 
-                        elm[0].querySelector('.progress-bar').animate([
+                        $bs5DOM.animate(elm[0].querySelector('.progress-bar'), [
                             {width: $old + 'px'},
                             {width: $new + 'px'}
-                        ], {
-                            duration: 300,
-                            easing: 'linear',
-                            iterations: 1,
-                            direction: 'normal',
-                            fill: 'forwards',
-                            delay: 0,
-                            endDelay: 0
-                        });
+                        ], 300);
                     }
                 });
             }

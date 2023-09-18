@@ -1,7 +1,7 @@
 /**
  * Module: Forms
  */
-angular.module('bs5.forms', ['bs5.position'])
+angular.module('bs5.forms', [])
 
 /**
  * Directive: bs5FormsErrors

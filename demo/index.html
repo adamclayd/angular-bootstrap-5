@@ -7,24 +7,26 @@
 	</head>
 	<body>
 		<div class="container" ng-controller="MainController">
+			<h5>Collapseable</h5>
 			<div class="row">
 				<div class="col-8">
-					<div class="row mb-2">
-						<button type="button" class="btn btn-sm btn-primary" ng-click="collapse.toggle()">Toggle</button>
+					<div class="mb-2">
+						<button type="button" class="btn btn-sm btn-primary me-2" ng-click="collapse.toggle()">Toggle</button>
 						<div class="form-check form-check-inline">
-							<input  class="form-check-input" type="checkbox" ng-model="collapse.horziontal">
+							<input  class="form-check-input" type="checkbox" ng-model="collapse.horizontal">
 							<label class="form-check-label">Animate Horizontal</label>
 						</div>
-						<div bs5-collapse="collapse.collapsed">
-							{{faker.lorem.paragraph(10)}}
-						</div>
+					</div>
+					<div bs5-collapse="collapse.collapsed" horizontal="collapse.horizontal" class="border border-dark-subtle">
+						{{collapse.content}}
 					</div>
 				</div>
 			</div>
 		</div>
 		<script src="faker.js"></script>
 		<script src="../lib/js/angular.js"></script>
-		<script src="../build/angularjs-bootstrap-5.js"></script>
+		<!--<script src="../build/angularjs-bootstrap-5.js"></script> -->
+		<script src="../src/bs5.dom.js"></script>
 		<script src="demo.js"></script>
 	</body>
 </html>

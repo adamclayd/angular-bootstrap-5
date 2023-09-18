@@ -504,6 +504,18 @@ angular.module('bs5.dom', [])
         };
 
         /**
+         * A promise wrapper for an html elements.animate function
+         * @param elm {angular.element || HTMLElement}
+         * @param keyFrames {Object[]}
+         * @param options {object | number}
+         */
+        this.animate = function(elm, keyFrames, options) {
+            return $q(function(r) {
+                (elm instanceof HTMLElement ? elm : elm[0]).animate(keyFrames, options).onfinish = r;
+            });
+        }
+
+        /**
          * Execute a fade in or out animation on an element
          * @param elm {angular.element} the element to run the fade animation on
          * @param from {number} opacity value
@@ -512,29 +524,14 @@ angular.module('bs5.dom', [])
          * @return {promise} promise that is resolved after the animation gets done running
          */
         this.fade = function(elm, from= 0, to = 1,  duration= 300) {
-            return $q(function(r, j) {
-                if(!angular.isElement(elm)) {
-                    j(TypeError('Parameter elm is not of type angular.element'));
-                }
-                else {
-                    elm[0].animate([
-                        {opacity: from},
-                        {opacity: to}
-                    ], {
-                        duration: duration,
-                        easing: 'linear',
-                        iterations: 1,
-                        direction: 'normal',
-                        fill: 'forwards',
-                        delay: 0,
-                        endDelay: 0
-                    }).onfinish = r;
-                }
-            });
+            return this.animate(elm, [
+                {opacity: from},
+                {opacity: to},
+            ], duration);
         };
 
         /**
-         * Execute a width or height sliding animation
+         * Execute a sliding sliding animation
          * @param elm {angular.element} the element to run the sliding aniation on
          * @param from {number} value for the scale() css function
          * @param to {number} value for the scale() css function
@@ -543,25 +540,31 @@ angular.module('bs5.dom', [])
          * @return {promise} promise that is resolved after the animation gets done running
          */
         this.slide = function(elm, from = 0, to = 1, horizontal = false, duration = 300) {
-            return $q(function(r, j) {
-                if(!angular.isElement(elm)) {
-                    j(TypeError('Parameter elm is not of type angular.element'));
-                }
-                else {
-                    elm.css('transform-origin', 'top left');
-                    elm[0].animate([
-                        horizontal ? {transform: 'scaleX(' + from + ')'} : {transform: 'scaleY(' + from + ')'},
-                        horizontal ? {transform:'scaleX(' + to + ')'} : {transform: 'scaleY(' + to + ')'}
-                    ], {
-                        duration: duration,
-                        easing: 'linear',
-                        iterations: 1,
-                        direction: 'normal',
-                        fill: 'forwards',
-                        delay: 0,
-                        endDelay: 0
-                    }).onfinish = r;
-                }
+            return this.animate(elm,[
+                horizontal ? {transform: 'scaleX(' + from + ')'} : {transform: 'scaleY(' + from + ')'},
+                horizontal ? {transform: 'scaleX(' + to + ')'} : {transform: 'scaleY(' + to + ')'}
+            ], duration).then(function () {
+                elm.css('transform-origin', '');
             });
         };
-    }]);
+
+        /**
+         * Execute a rolling sliding animation
+         * @param elm {angular.element} the element to run the rolling aniation on
+         * @param type {'in' | 'out'} type of roll. is the animation rolling in or out
+         * @param horizontal {boolean} whether this is a horizontal or vertical animation {default: false}
+         * @param duration {duration} the duration in ms of the animation {default: 300}
+         * @return {promise} promise that is resolved after the animation gets done running
+         */
+        this.roll = function(elm, type, horizontal = false, duration = 300) {
+            let size = horizontal ? elm[0].offsetWidth : elm[0].offsetHeight;
+            elm.css({overflow: 'hidden'});
+            let order = type === 'out' ? [size + 'px', '0px'] : ['0px', size + 'px'];
+            return animate([
+                horizontal ? {width: order[0]} : {height: order[0]},
+                horizontal ? {width: order[1]} : {height: order[1]}
+            ], duration).then(function () {
+                elm.css({overflow: ''});
+            });
+        };
+    }])

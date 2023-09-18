@@ -1,5 +1,5 @@
 angular.module('ngBootstrap5', [
-	'bs5.accordian',
+	'bs5.accordion',
 	'bs5.alert',
 	'bs5.autocomplete',
 	'bs5.collapse',
@@ -203,7 +203,7 @@ angular.module('bs5.alert', [])
     }]);
 
 
-angular.module('bs5.autocomplete', ['$bs5.dom'])
+angular.module('bs5.autocomplete', ['bs5.dom'])
 
     
     .directive('bs5Autocomplete', ['$timeout', '$http', '$compile', '$document', '$bs5Position', function($timeout, $http, $compile, $document, $bs5Position) {
@@ -454,44 +454,49 @@ angular.module('bs5.autocomplete', ['$bs5.dom'])
 
 angular.module('bs5.collapse', ['bs5.dom'])
 
+    
+    .directive('bs5Collapse', ['$timeout', '$bs5DOM', function($timeout, $bs5DOM) {
+        return {
+            restrict: 'A',
+            scope: {
+                collapsed: '=bs5Collapse',
+                onCollapsed: '&',
+                onExpanded: '&',
+                horizontal: '=?'
+            },
+            link: function(scope, elm, attrs) {
 
-.directive('bs5Collapse', ['$timeout', '$bs5DOM', function($timeout, $bs5DOM) {
-    return {
-        restrict: 'A',
-        scope: {
-            onExpanded: '&?',
-            onCollapsed: '&?',
-            horizontal: '=?'
-        },
-        link: function(scope, elm, attrs) {
+                elm.css({
+                    'overflow': 'hidden'
+                });
 
-            elm.css({
-                'overflow': 'hidden'
-            });
+                elm.addClass('collapse');
 
-            elm.addClass('collapse');
-
-            if(scope.$eval(attrs.bs5Collapse))
-                elm.addClass('show');
+                if(!scope.collapsed)
+                    elm.addClass('show');
 
 
-            scope.$watch(attrs.bs5Collapse, function($new, $old) {
-                if(!angular.equals($new, $old)) {
-                    if ($new && angular.isDefined($old)) {
-                        $bs5DOM.slide(elm, 1, 0, scope.horizontal).then(function () {
-                            elm.removeClass('show');
-                            scope.onCollapsed();
-                        });
+                scope.$watch('collapsed', function($new, $old) {
+                    if(!angular.equals($new, $old)) {
+                        if ($new && angular.isDefined($old)) {
+                            console.log(scope.horizontal);
+                            $bs5DOM.slide(elm, 1, 0, scope.horizontal).then(function () {
+                                elm.removeClass('show');
+
+                                scope.onCollapsed();
+                            });
+                        }
+                        else if (angular.isDefined($old)) {
+                            elm.addClass('show');
+                            $bs5DOM.slide(elm, 0, 1, scope.horizontal).then(function() {
+                                scope.onExpanded();
+                            });
+                        }
                     }
-                    else if (angular.isDefined($old)) {
-                        elm.addClass('show');
-                        $bs5DOM.slide(elm, 0, 1, scope.horizontal).then(scope.onExpanded);
-                    }
-                }
-            });
+                });
+            }
         }
-    }
-}]);
+    }]);
 
 
 angular.module('bs5.datepicker', ['bs5.dom'])
@@ -1212,55 +1217,46 @@ angular.module('bs5.dom', [])
         };
 
         
-        this.fade = function(elm, from= 0, to = 1,  duration= 300) {
-            return $q(function(r, j) {
-                if(!angular.isElement(elm)) {
-                    j(TypeError('Parameter elm is not of type angular.element'));
-                }
-                else {
-                    elm[0].animate([
-                        {opacity: from},
-                        {opacity: to}
-                    ], {
-                        duration: duration,
-                        easing: 'linear',
-                        iterations: 1,
-                        direction: 'normal',
-                        fill: 'forwards',
-                        delay: 0,
-                        endDelay: 0
-                    }).onfinish = r;
-                }
+        this.animate = function(elm, keyFrames, options) {
+            return $q(function(r) {
+                (elm instanceof HTMLElement ? elm : elm[0]).animate(keyFrames, options).onfinish = r;
             });
+        }
+
+        
+        this.fade = function(elm, from= 0, to = 1,  duration= 300) {
+            return this.animate(elm, [
+                {opacity: from},
+                {opacity: to},
+            ], duration);
         };
 
         
         this.slide = function(elm, from = 0, to = 1, horizontal = false, duration = 300) {
-            return $q(function(r, j) {
-                if(!angular.isElement(elm)) {
-                    j(TypeError('Parameter elm is not of type angular.element'));
-                }
-                else {
-                    elm.css('transform-origin', 'top left');
-                    elm[0].animate([
-                        horizontal ? {transform: 'scaleX(' + from + ')'} : {transform: 'scaleY(' + from + ')'},
-                        horizontal ? {transform:'scaleX(' + to + ')'} : {transform: 'scaleY(' + to + ')'}
-                    ], {
-                        duration: duration,
-                        easing: 'linear',
-                        iterations: 1,
-                        direction: 'normal',
-                        fill: 'forwards',
-                        delay: 0,
-                        endDelay: 0
-                    }).onfinish = r;
-                }
+            return this.animate(elm,[
+                horizontal ? {transform: 'scaleX(' + from + ')'} : {transform: 'scaleY(' + from + ')'},
+                horizontal ? {transform: 'scaleX(' + to + ')'} : {transform: 'scaleY(' + to + ')'}
+            ], duration).then(function () {
+                elm.css('transform-origin', '');
             });
         };
-    }]);
+
+        
+        this.roll = function(elm, type, horizontal = false, duration = 300) {
+            let size = horizontal ? elm[0].offsetWidth : elm[0].offsetHeight;
+            elm.css({overflow: 'hidden'});
+            let order = type === 'out' ? [size + 'px', '0px'] : ['0px', size + 'px'];
+            return animate([
+                horizontal ? {width: order[0]} : {height: order[0]},
+                horizontal ? {width: order[1]} : {height: order[1]}
+            ], duration).then(function () {
+                elm.css({overflow: ''});
+            });
+        };
+    }])
 
 
-angular.module('bs5.forms', ['bs5.position'])
+angular.module('bs5.forms', [])
 
 
     .directive('bs5FormErrors', ['$bs5Position', '$timeout', '$q', function($bs5Position, $timeout, $q) {
@@ -1507,7 +1503,7 @@ angular.module('bs5.modal', ['bs5.dom'])
         }
 
         this.close = function() {
-            $bs5DOM(backdrop, 0.5, 0).then(function() {
+            $bs5DOM.fade(backdrop, 0.5, 0).then(function() {
                 backdrop.remove();
             });
 
@@ -1540,7 +1536,7 @@ angular.module('bs5.modal', ['bs5.dom'])
 
     }])
 
-    .service('$$stack', ['$$backdrop', function($$backdrop) {
+    .service('$$stack', function() {
         let stack = [];
 
         this.push = function(modal) {
@@ -1565,10 +1561,10 @@ angular.module('bs5.modal', ['bs5.dom'])
         }
 
         this.size = function() {
-
+            return stack.length;
         }
 
-    }]);
+    });
 
 
 
@@ -2001,11 +1997,10 @@ angular.module('bs5.popover', ['bs5.dom'])
     }]);
 
 
-angular.module('bs5.progressbar', [])
+angular.module('bs5.progressbar', ['bs5.dom'])
 
     
-    .directive('bs5Progressbar', ['$animate', '$injector', function($animate, $injector) {
-        let $animateCss = $injector.has('$animateCss') ? $injector.get('$animateCss') : null;
+    .directive('bs5Progressbar', ['$bs5DOM', function($bs5DOM) {
 
         return {
             restrict: 'E',
@@ -2018,7 +2013,7 @@ angular.module('bs5.progressbar', [])
                 statusText: '@?',
                 countCompleted: '=?',
                 countTotal: '=?',
-                countType: '@'
+                countType: '@?'
             },
             templateUrl: function(elm, attrs) {
                 return attrs.templateUrl || 'angular/bootstrap5/templates/progressbar/progressbar.html';
@@ -2042,18 +2037,10 @@ angular.module('bs5.progressbar', [])
                             scope.value = 100;
 
 
-                        elm[0].querySelector('.progress-bar').animate([
+                        $bs5DOM.animate(elm[0].querySelector('.progress-bar'), [
                             {width: $old + 'px'},
                             {width: $new + 'px'}
-                        ], {
-                            duration: 300,
-                            easing: 'linear',
-                            iterations: 1,
-                            direction: 'normal',
-                            fill: 'forwards',
-                            delay: 0,
-                            endDelay: 0
-                        });
+                        ], 300);
                     }
                 });
             }

@@ -1,8 +1,5 @@
 /**
  * Module: bs5.tabs
- *
- * Requires:
- *      ngAnimate
  */
 angular.module('bs5.tabs', ['bs5.dom'])
 

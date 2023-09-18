@@ -200,7 +200,7 @@ angular.module('bs5.modal', ['bs5.dom'])
         }
 
         this.close = function() {
-            $bs5DOM(backdrop, 0.5, 0).then(function() {
+            $bs5DOM.fade(backdrop, 0.5, 0).then(function() {
                 backdrop.remove();
             });
 
@@ -233,7 +233,7 @@ angular.module('bs5.modal', ['bs5.dom'])
 
     }])
 
-    .service('$$stack', ['$$backdrop', function($$backdrop) {
+    .service('$$stack', function() {
         let stack = [];
 
         this.push = function(modal) {
@@ -258,7 +258,7 @@ angular.module('bs5.modal', ['bs5.dom'])
         }
 
         this.size = function() {
-
+            return stack.length;
         }
 
-    }]);
+    });

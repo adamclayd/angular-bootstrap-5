@@ -1,10 +1,7 @@
 /**
  * Module: bs5.autocomplete
- *
- * Requires:
- *      bs5.dom
  */
-angular.module('bs5.autocomplete', ['$bs5.dom'])
+angular.module('bs5.autocomplete', ['bs5.dom'])
 
     /**
      * Directive: bs5Autocomplete
