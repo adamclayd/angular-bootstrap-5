@@ -1,6 +1,3 @@
-import { faker } from 'https://cdn.skypack.dev/@faker-js/faker';
-
-console.log('loaded demo');
 angular.module('app', ['ngBootstrap5'])
 
     .controller('MainController', ['$scope', '$bs5Modal', function($scope,  $bs5Modal) {
