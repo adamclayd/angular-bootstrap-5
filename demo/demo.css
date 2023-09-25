@@ -1,0 +1,21 @@
+#left-tabset, #right-tabset, #tabset-top {
+    height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    scrollbar-width: none;
+}
+
+.bs5-tabset-right .bs5-tab {
+    text-align: left;
+}
+
+.bs5-tabset-left .bs5-tab {
+    text-align: right;
+}
+
+.bs5-tabset-top .tab-pane::-webkit-scrollbar,
+.bs5-tabset-left .tab-pane::-webkit-scrollbar,
+.bs5-tabset-right .tab-pane::-webkit-scrollbar {
+    display: none;
+}
