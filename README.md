@@ -9,4 +9,4 @@ documentation.
 
 Run ```node build.js``` to build the sources into one file.
 
-For the tested and working version go to [https://github.com/adamclayd/angular-bootstrap-5/tree/e5c212a22a7c94c8247aec33052c31c4beec529c](https://github.com/adamclayd/angular-bootstrap-5/tree/e5c212a22a7c94c8247aec33052c31c4beec529c)
+For the tested and working version go to [https://github.com/adamclayd/angular-bootstrap-5](https://github.com/adamclayd/angular-bootstrap-5)
