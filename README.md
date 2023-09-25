@@ -1,6 +1,8 @@
 # ngBootstrap5
+###### Version 2.0
 
 ### Bootstrap 5 for Angular JS
+###### Bootstrap Version 5.3.2
 
 I'm working on getting the documentation back on here. As you can see 
 I have completely redone the whole thing. I haven't tested it all either.
