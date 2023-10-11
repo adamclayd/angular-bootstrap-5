@@ -179,7 +179,7 @@ Attributes
 </bs5-tabset>
 ```
 
-## Modal
+## Modal 
 
 #### Service: $bs5Modal
 
