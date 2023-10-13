@@ -6,10 +6,12 @@ angular.module('bs5.rating', [])
     /**
      * Directive: bs5Rating
      *
-     * A rating widget that allows a user to rate something by clicking on the star rating
+     * A rating widget that allows a user to rate something by clicking on the star rating. It uses icons by default. So you can
+     * change the color or font size of it by adding css to the element that this directive is applied. You can also change the
+     * icons by setting the state-on-icon and state-off-icon attributes which default to `bi bi-star-fill` and `bi bi-star`
      *
      * IMPORTANT:
-     * 		Bootstrap Icons stylesheet is required
+     * 		Bootstrap Icons stylesheet is required with the default template and the default state on and off icons
      *
      * attributes:
      *  	readonly:            <boolean>       if true the user will not be able to modify the rating {default: false}
@@ -22,9 +24,46 @@ angular.module('bs5.rating', [])
      *  	on-rating-change:    <expression>    the event handler to call when the rating is changed. $rating which is the
      *                                           value of the rating is provided to the expression
      *
-     *      color:               <string>        change the color of the stars. can be any css color value
+     *      state-on-icon:       <string>       the class of the icon that you want to use for when a rating is marked. {default: 'bi bi-star-fill'}
      *
-     *      size:                <string>        change the size of the stars. can be any css font value;
+     *      state-off-icon:      <string>       the class of the icon that you want to use for when a rating is unmarked. {default: 'bi bi-star'}
+     *
+     * Using A Custom Template:
+     *      If you want to use images for your icons you have to make your own template template. You can have a class for
+     *      the attributes `state-on-icon` and `state-off-icon` that have the `content: url(/path/to/state-on-or-off-image)`
+     *      for the css of the images and interpolate it in the class attribute of the images.
+     *
+     *          Example:
+     *              <style>
+     *                  .stateOn {
+     *                      content: url(/path/to/state-on-image);
+     *                      width: 24px;
+     *                      height: 24px;
+     *                  }
+     *
+     *                  .stateOff {
+     *                      content: url(/path/to/state-off-image);
+     *                      width: 24px;
+     *                      height: 24px;
+     *                  }
+     *              </style>
+     *              <script type="text/ng-template" id="rating-template.html">
+     *                  <img class="{{$index < value ? 'stateOn' : 'stateOff'}} ng-repeat="r in range" ng-mouseenter="enter($index + 1)" ng-click="rate($index + 1)" ng-mouseleave="leave()">
+     *              </script>
+     *              <div ng-controller="MainController">
+     *                  <span bs5-rating templateUrl="rating-template.html" ng-model="model.rating"></span>
+     *              </div>
+     *
+     *
+     *      Or you can interpolate in the src attribute with the path to state on and off images.
+     *
+     *          Example:
+     *              <script type="text/ng-template" id="rating-template.html">
+     *                  <img src="{{$index < value ? '/path/to/state-on-image' : '/path/to/state-off-image'}} style="width: 24px; height: 24px;" ng-repeat="r in range" ng-mouseenter="enter($index + 1)" ng-click="rate($index + 1)" ng-mouseleave="leave()">
+     *              </script>
+     *              <div ng-controller="MainController">
+     *                  <span bs5-rating templateUrl="rating-template.html" ng-model="model.rating"></span>
+     *              </div>
      */
     .directive('bs5Rating', function() {
         return {
@@ -32,8 +71,7 @@ angular.module('bs5.rating', [])
             require: 'ngModel',
             scope: {
                 readonly: '=?',
-                onRatingChange: '&?',
-                color: '@?'
+                onRatingChange: '&?'
             },
             templateUrl: function(elm, attrs) {
                 return attrs.templateurl || 'angular/bootstrap5/templates/rating/rating.html'
@@ -51,8 +89,8 @@ angular.module('bs5.rating', [])
                     scope.value = ctrl.$modelValue;
                 }
 
-                scope.stateOnIcon = attrs.stateOnIcon || 'bi-star-fill';
-                scope.stateOffIcon = attrs.stateOffIcon || 'bi-star';
+                scope.stateOnIcon = attrs.stateOnIcon || 'bi bi-star-fill';
+                scope.stateOffIcon = attrs.stateOffIcon || 'bi bi-star';
 
                 scope.range = [];
 
@@ -91,6 +129,6 @@ angular.module('bs5.rating', [])
     .run(['$templateCache', function($templateCache) {
         $templateCache.put(
             'angular/bootstrap5/templates/rating/rating.html',
-            '<i class="bi {{$index < value ? stateOnIcon : stateOffIcon}}" ng-style="{cursor: readonly ? \'inheriit\' : \'pointer\', color: color || \'inherit\', font-size: size || \'inherit\'}" ng-repeat="r in range" ng-mouseenter="enter($index + 1)" ng-click="rate($index + 1)" ng-mouseleave="leave()"></i>'
+            '<i class="{{$index < value ? stateOnIcon : stateOffIcon}}" ng-repeat="r in range" ng-mouseenter="enter($index + 1)" ng-click="rate($index + 1)" ng-mouseleave="leave()"></i>'
         );
     }]);

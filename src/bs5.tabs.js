@@ -8,32 +8,8 @@ angular.module('bs5.tabs', ['bs5.dom'])
      */
     .controller('Bs5TabsetController', ['$scope', function($scope) {
         let ctrl = this;
-        let ndx = null;
+
         ctrl.tabs = [];
-
-        /**
-         * Selects the tab to open
-         * @param index {number} the index of the tab to open
-         * @param evt {MouseEvent}
-         */
-        ctrl.select = function(index, evt) {
-            if(evt && evt.target.tagName.toLowerCase() === 'a')
-                evt.preventDefault();
-
-            if(!destroyed) {
-                if(angular.isNumber(ndx) && ctrl.tabs[ndx]) {
-                    ctrl.tabs[ndx].onDeselect({$tabIndex: index, $event: evt});
-                    ctrl.tabs[ndx].active = false;
-                }
-
-                ndx = ctrl.active = index;
-
-                if(angular.isNumber(index) && ctrl.tabs[index]) {
-                    ctrl.tabs[index].onSelect({$tabIndex: index, $event: evt});
-                    ctrl.tabs[index].active = true;
-                }
-            }
-        };
 
         /**
          * Adds a tab to the tabset
@@ -41,12 +17,6 @@ angular.module('bs5.tabs', ['bs5.dom'])
          */
         ctrl.addTab = function(tab) {
             ctrl.tabs.push(tab);
-
-            let index = ctrl.findTabIndex(tab);
-
-            if(!angular.isNumber(ctrl.active)) {
-                ctrl.select(0);
-            }
         }
 
 
@@ -59,12 +29,6 @@ angular.module('bs5.tabs', ['bs5.dom'])
 
             if(index !== null) {
                 ctrl.tabs.splice(index, 1);
-
-                if(index === ctrl.active) {
-                    let newIndex = ctrl.active === ctrl.tabs.length ? ctrl.active - 1 : (ctrl.active + 1) % ctrl.tabs.length;
-                    ndx = ctrl.active = null;
-                    ctrl.select(newIndex);
-                }
             }
         }
 
@@ -84,11 +48,6 @@ angular.module('bs5.tabs', ['bs5.dom'])
 
             return index;
         }
-
-        $scope.$watch('tabset.active', function(val, old) {
-            if(val !== old)
-                ctrl.select(val);
-        });
 
         let destroyed = false;
         $scope.$on('$destroy', function() {
@@ -118,7 +77,7 @@ angular.module('bs5.tabs', ['bs5.dom'])
             controller: 'Bs5TabsetController',
             controllerAs: 'tabset',
             templateUrl: function(elm, attrs) {
-                return (attrs.placement === 'left' ? 'angular/bootstrap5/templates/tabs/tabset-left.html' : (attrs.placement === 'right' ? 'angular/bootstrap5/templates/tabs/tabset-right.html' : 'angular/bootstrap5/templates/tabs/tabset-top.html'));
+                return (attrs.vertical === 'true' ? 'angular/bootstrap5/templates/tabs/tabset-vertical.html' : 'angular/bootstrap5/templates/tabs/tabset-horizontal.html');
             },
             link: function(scope, elm, attrs) {
                 scope.type = /^(pills|tabs|underline)$/.test(attrs.type) ? attrs.type : 'tabs';
@@ -167,7 +126,7 @@ angular.module('bs5.tabs', ['bs5.dom'])
                 onDeselect: '&tabDeselect'
             },
             templateUrl: function(elm, attrs) {
-                return !(/^(top)$/.test(elm.parent().attr('placement'))) ? 'angular/bootstrap5/templates/tabs/tab-vertical.html' : 'angular/bootstrap5/templates/tabs/tab.html';
+                return $parse(elm.parent().attr('vertical'))() ? 'angular/bootstrap5/templates/tabs/tab-vertical.html' : 'angular/bootstrap5/templates/tabs/tab-horizontal.html';
             },
             controller: function() {},
             controllerAs: 'tab',
@@ -180,6 +139,8 @@ angular.module('bs5.tabs', ['bs5.dom'])
                 }
 
                 let tabPane = null;
+                let index = null;
+
                 $timeout(function() {
                     let children = elm.parent().children();
 
@@ -189,22 +150,67 @@ angular.module('bs5.tabs', ['bs5.dom'])
                             break;
                     }
 
-                    tabPane = elm.parent().parent()[0].querySelectorAll('.tab-pane')[i];
-                }, 500);
+                    tabPane = angular.element(elm.parent().parent()[0].querySelectorAll('.tab-pane')[tpIndex]);
+                    scope.index = index = i;
+
+                    if(i === 0 && !ctrl.tabs.find(x => x.active)) {
+                        if(tabPane.hasClass('fade'))
+                            tabPane.addClass('show');
+
+                        tabPane.addClass('active');
+                        scope.active = true;
+                    }
+                });
 
                 scope.select = function(evt) {
-                    if(!scope.disabled) {
-                        ctrl.select(ctrl.findTabIndex(scope), evt);
+                    if(!scope.disabled && !tabPane.hasClass('active') && !scope.active) {
+                        let atIndex = null;
+                        let atp = null;
+                        let tps = elm.parent().parent()[0].querySelectorAll('.tab-pane');
+                        for (let i = 0; i < tps.length; i++) {
+                            let el = angular.element(tps[i]);
+                            if(el.hasClass('active')) {
+                                atIndex = i;
+                                atp = el;
+                                break;
+                            }
+                        }
 
-                        $bs5DOM.fade(tabPane);
+                        scope.onDeselect({$tabIndex: atIndex, $event: evt});
+                        ctrl.tabs[atIndex].active = false;
+                        scope.active = true;
+                        $bs5DOM.fade(atp).then(function() {
+                            atp.removeClass('active');
+                            tabPane.addClass('active');
+                            scope.onSelect({$tabIndex: index, $event: evt});
+                            $bs5DOM.fade(tabPane);
+                        });
                     }
-                }
+                };
 
                 scope.$transcludeFn = transclude;
+
                 ctrl.addTab(scope);
+
+                let tpIndex = ctrl.tabs.length - 1;
 
                 scope.$on('$destroy', function() {
                     ctrl.removeTab(scope);
+
+                    if(scope.active) {
+                        scope.active = false;
+                        let i = index === ctrl.tabs.length ? ctrl.tabs.length - 1 : index;
+                        let tab = ctrl.tabs.find(x => x.index === i);
+                        let tpIndex = ctrl.findTabIndex(tab);
+                        let tp = angular.element(elm.parent().parent()[0].querySelector('.tab-pane:nth-child(' + (tpIndex + 1) + ')'));
+
+                        elm.remove();
+                        tabPane.remove();
+
+                        tab.active = true;
+                        tp.addClass('active');
+                        $bs5DOM.fade(tp);
+                    }
                 });
             }
 
@@ -262,42 +268,33 @@ angular.module('bs5.tabs', ['bs5.dom'])
 
     .run(['$templateCache', function($templateCache) {
         $templateCache.put(
-            'angular/bootstrap5/templates/tabs/tabset-top.html',
-            '<div class="bs5-tabset-top">' +
+            'angular/bootstrap5/templates/tabs/tabset-horizontal.html',
+            '<div class="bs5-tabset-horizontal">' +
                 '<nav class="nav nav-{{type}} mb-2" ng-class="{\'nav-justified\': justified, \'nav-fill\': fill}" ng-transclude></nav>' +
                 '<div class="tab-content">' +
-                    '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
+                    '<div class="tab-pane fade" ng-repeat="tab in tabset.tabs" bs5-tab-content-transclude="tab"></div>' +
                 '</div>' +
             '</div>'
         );
 
-        $templateCache.put(
-            'angular/bootstrap5/templates/tabs/tab.html',
-            '<a href="#" class="nav-link bs5-tab" ng-class="{active: active, disabled: disabled}" ng-click="select($event)" bs5-tab-heading-transclude>{{heading}}</a>'
-        );
 
         $templateCache.put(
-            'angular/bootstrap5/templates/tabs/tabset-left.html',
-            '<div class="align-items-start bs5-tabset-left">' +
-                '<div class="nav flex-column nav-pills float-start me-3" ng-transclude></div>' +
+            'angular/bootstrap5/templates/tabs/tabset-vertical.html',
+            '<div class="d-flex align-items-start bs5-tabset-vertical">' +
+                '<div class="nav flex-column nav-pills me-3" ng-transclude></div>' +
                 '<div class="tab-content">' +
-                    '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
+                    '<div class="tab-pane fade" ng-repeat="tab in tabset.tabs" bs5-tab-content-transclude="tab"></div>' +
                 '</div>' +
             '</div>'
         );
 
         $templateCache.put(
             'angular/bootstrap5/templates/tabs/tab-vertical.html',
-            '<button class="nav-link text-nowrap overflow-hidden bs5-tab" ng-class="{active: active, disabled: disabled}" ng-disabled="disabled" ng-click="select($event)" bs5-tab-heading-transclude>{{heading}}</button>'
+            '<button class="nav-link bs5-tab text-start" ng-class="{active: active, disabled: disabled}" ng-disabled="disabled" ng-click="select($event)" bs5-tab-heading-transclude>{{heading}}</button>'
         );
 
         $templateCache.put(
-            'angular/bootstrap5/templates/tabs/tabset-right.html',
-            '<div class="align-items-start bs5-tabset-right">' +
-                '<div class="tab-content float-start">' +
-                    '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
-                '</div>' +
-                '<div class="nav flex-column nav-pills ms-3" ng-transclude></div>' +
-            '</div>'
+            'angular/bootstrap5/templates/tabs/tab-horizontal.html',
+            '<a class="nav-link bs5-tab" href ng-class="{active: active, disabled: disabled}" ng-disabled="disabled" ng-click="select($event)" bs5-tab-heading-transclude>{{heading}}</a>'
         );
     }]);

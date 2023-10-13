@@ -1,7 +1,7 @@
 /**
  * Module: bs5.collapse
  */
-angular.module('bs5.collapse', ['bs5.dom'])
+angular.module('bs5.collapse', [])
 
     /**
      * Directive: bs5Collapse
@@ -15,8 +15,6 @@ angular.module('bs5.collapse', ['bs5.dom'])
      *      on-expanded:       <expression>          the event handler that is fired after the collapsable has expanded
      *
      *      on-collapsed       <expression>          the event handler that is fired after the collapsable has collapsed
-     *
-     *      animation          <'roll' | 'slide'>    set to roll or slide animation
      */
     .directive('bs5Collapse', ['$timeout', '$q', function($timeout, $q) {
         return {
@@ -25,10 +23,13 @@ angular.module('bs5.collapse', ['bs5.dom'])
                 collapsed: '=bs5Collapse',
                 onCollapsed: '&',
                 onExpanded: '&',
-                horizontal: '=?',
             },
             link: function(scope, elm, attrs) {
                 elm.addClass('collapse');
+
+                let horizontal = scope.$eval(attrs.horizontal);
+
+                let collapsing = false;
 
                 let width = null;
                 let height = null;
@@ -42,15 +43,6 @@ angular.module('bs5.collapse', ['bs5.dom'])
                         elm.removeClass('show');
                 });
 
-                scope.$watch('horizontal', function(horizontal) {
-                    if(horizontal) {
-                        elm.addClass('collapse-horizontal');
-                    }
-                    else {
-                        elm.removeClass('collapse-horizontal');
-                    }
-                });
-
                 scope.$watch(function() {
                     return elm[0].offsetHeight;
                 }, function(value) {
@@ -62,7 +54,7 @@ angular.module('bs5.collapse', ['bs5.dom'])
                 function animate() {
                     return $q(function(res) {
                         new Promise(function (r) {
-                            if (scope.horizontal) {
+                            if (horizontal) {
                                 elm[0].style.height = height;
                                 if (scope.collapsed) {
                                     elm[0].style.width = width;
@@ -123,11 +115,23 @@ angular.module('bs5.collapse', ['bs5.dom'])
 
                 scope.$watch('collapsed', function($new, $old) {
                     if(!angular.equals($new, $old)) {
-                        if ($new && angular.isDefined($old)) {
-                            animate(true).then(scope.onCollapsed);
+                        if(!collapsing) {
+                            if ($new && angular.isDefined($old)) {
+                                collapsing = true;
+                                animate().then(function() {
+                                    collapsing = false;
+                                    scope.onCollapsed();
+                                });
+                            } else if (angular.isDefined($old)) {
+                                collapsing = true;
+                                animate().then(function() {
+                                    collapsing = false;
+                                    scope.onExpanded();
+                                });
+                            }
                         }
-                        else if (angular.isDefined($old)) {
-                            animate(false).then(scope.onExpanded);
+                        else {
+                            scope.collapsed = !$new;
                         }
                     }
                 });

@@ -1,4 +1,4 @@
-#left-tabset, #right-tabset, #tabset-top {
+#tabset-vertical, #tabset-horizontal {
     height: 400px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -12,10 +12,4 @@
 
 .bs5-tabset-left .bs5-tab {
     text-align: right;
-}
-
-.bs5-tabset-top .tab-pane::-webkit-scrollbar,
-.bs5-tabset-left .tab-pane::-webkit-scrollbar,
-.bs5-tabset-right .tab-pane::-webkit-scrollbar {
-    display: none;
 }

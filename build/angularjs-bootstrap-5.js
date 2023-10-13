@@ -23,7 +23,6 @@ angular.module('bs5.accordion', ['bs5.collapse'])
         closeOthers: true
     })
 
-    
     .controller('Bs5AccordionController', ['$scope', '$attrs', 'bs5AccordionConfig', function($scope, $attrs, bs5AccordionConfig) {
         this.groups = [];
 
@@ -156,7 +155,7 @@ angular.module('bs5.accordion', ['bs5.collapse'])
             'angular/bootstrap5/templates/accordion/accordion-group.html',
             '<div class="accordion-item">' +
                 '<h2 class="accordion-header">' +
-                    '<button type="button" ng-click="toggleOpen()" ng-class="{collapsed: !isOpen}" class="accordion-button" bs5-accordion-transclude><span bs5-accordion-header>{{heading}}</span></button>' +
+                    '<button type="button" ng-click="toggleOpen()" ng-class="{collapsed: !isOpen}" class="accordion-button" bs5-accordion-transclude="heading"><span bs5-accordion-header>{{heading}}</span></button>' +
                 '</h2>' +
                 '<div class="accordion-collapse" bs5-collapse="!isOpen">' +
                     '<div class="accordion-body">' +
@@ -453,7 +452,7 @@ angular.module('bs5.autocomplete', ['bs5.dom'])
     }]);
 
 
-angular.module('bs5.collapse', ['bs5.dom'])
+angular.module('bs5.collapse', [])
 
     
     .directive('bs5Collapse', ['$timeout', '$q', function($timeout, $q) {
@@ -463,10 +462,13 @@ angular.module('bs5.collapse', ['bs5.dom'])
                 collapsed: '=bs5Collapse',
                 onCollapsed: '&',
                 onExpanded: '&',
-                horizontal: '=?',
             },
             link: function(scope, elm, attrs) {
                 elm.addClass('collapse');
+
+                let horizontal = scope.$eval(attrs.horizontal);
+
+                let collapsing = false;
 
                 let width = null;
                 let height = null;
@@ -480,15 +482,6 @@ angular.module('bs5.collapse', ['bs5.dom'])
                         elm.removeClass('show');
                 });
 
-                scope.$watch('horizontal', function(horizontal) {
-                    if(horizontal) {
-                        elm.addClass('collapse-horizontal');
-                    }
-                    else {
-                        elm.removeClass('collapse-horizontal');
-                    }
-                });
-
                 scope.$watch(function() {
                     return elm[0].offsetHeight;
                 }, function(value) {
@@ -500,7 +493,7 @@ angular.module('bs5.collapse', ['bs5.dom'])
                 function animate() {
                     return $q(function(res) {
                         new Promise(function (r) {
-                            if (scope.horizontal) {
+                            if (horizontal) {
                                 elm[0].style.height = height;
                                 if (scope.collapsed) {
                                     elm[0].style.width = width;
@@ -561,11 +554,23 @@ angular.module('bs5.collapse', ['bs5.dom'])
 
                 scope.$watch('collapsed', function($new, $old) {
                     if(!angular.equals($new, $old)) {
-                        if ($new && angular.isDefined($old)) {
-                            animate(true).then(scope.onCollapsed);
+                        if(!collapsing) {
+                            if ($new && angular.isDefined($old)) {
+                                collapsing = true;
+                                animate().then(function() {
+                                    collapsing = false;
+                                    scope.onCollapsed();
+                                });
+                            } else if (angular.isDefined($old)) {
+                                collapsing = true;
+                                animate().then(function() {
+                                    collapsing = false;
+                                    scope.onExpanded();
+                                });
+                            }
                         }
-                        else if (angular.isDefined($old)) {
-                            animate(false).then(scope.onExpanded);
+                        else {
+                            scope.collapsed = !$new;
                         }
                     }
                 });
@@ -859,14 +864,15 @@ angular.module('bs5.dom', [])
 
         
         this.offset = function(elm) {
-            let rect = elm[0].getBoundingClientRect(),
+            elm = elm instanceof HTMLElement ? elm : elm[0];
+            let rect =  elm.getBoundingClientRect(),
                 scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
                 scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             return {
                 top: rect.top + scrollTop,
                 left: rect.left + scrollLeft,
-                width: elm[0].offsetWidth,
-                height: elm[0].offsetHeight
+                width: elm.offsetWidth,
+                height: elm.offsetHeight
             };
         };
 
@@ -1078,7 +1084,7 @@ angular.module('bs5.dom', [])
                 let plc = place + '-center';
 
                 return this.positionTargetRelative(tip, arrow, tip, plc, isPopover ? popoverOff : tooltipOff);
-            }
+            };
 
             function getTipPos() {
                 const ttOff = 4;
@@ -1092,7 +1098,7 @@ angular.module('bs5.dom', [])
                 return rel ?
                     this.positionTargetRelative(host, tip, rel, plc, isPopover ? popoverOff : tooltipOff) :
                     this.positionTarget(host, tip, plc, isPopover ? popoverOff : tooltipOff);
-            }
+            };
 
             function getPlacementClass() {
                 let lastPlcClass;
@@ -1110,7 +1116,7 @@ angular.module('bs5.dom', [])
                     lastPlcClass = isPopover ? 'bs-popover-bottom' :  'bs-tooltip-bottom';
 
                 return lastPlcClass;
-            }
+            };
 
             function positionLeftRight() {
                 if(tipPos.left < coff.left) {
@@ -1134,7 +1140,7 @@ angular.module('bs5.dom', [])
                         throw new DOMException('The tooltip element is too wide to fit in the container')
                     }
                 }
-            }
+            };
 
             function positionTopBottom() {
                 if(tipPos.top < coff.top) {
@@ -1157,82 +1163,41 @@ angular.module('bs5.dom', [])
                         throw new DOMException('The tooltip element is too tall to fit in');
                     }
                 }
-            }
+            };
 
             function isOutOfRange() {
                 return (place === 'left' && tipPos.left < coff.left) ||
                     (place === 'right' && tipPos.left + tip[0].offsetWidth > coff.left + coff.width) ||
                     (place === 'top' && tipPos.top < coff.top) ||
                     (place === 'bottom' && tipPos.top + tip[0].offsetHeight > coff.top + coff.height);
-            }
+            };
 
-            function placeAtFallback() {
-                let fp = fallbackPlacements.filter(x => /^(top|bottom|left|right)$/.test(x));
+            function placeFallback(fp, index) {
                 let position = () => {
-                    if(place === 'left' || place === 'right')
+                    if (place === 'left' || place === 'right')
                         positionTopBottom();
                     else
                         positionLeftRight();
                 };
 
-                if(fp.length > 0) {
-                    place = fb[0];
-                    tipPos = getTipPos();
-                    arrowPos = getArrowPos();
+                if (index >= fp.length)
+                    return false;
 
-                    if(isOutOfRange()) {
-                        if(fp.length > 1) {
-                            place = fb[1];
-                            tipPos = getTipPos();
-                            arrowPos = getArrowPos();
+                place = fb[index];
+                tipPos = getTipPos();
+                arrowPos = getArrowPos();
 
-                            if(isOutOfRange()) {
-                                if(fp.length > 2) {
-                                    place = fb[2];
-                                    tipPos = getTipPos();
-                                    arrowPos = getArrowPos();
-
-                                    if(isOutOfRange) {
-                                        if(fp.length > 3) {
-                                            place = fb[3];
-                                            tipPos = getTipPos();
-                                            arrowPos = getArrowPos();
-
-                                            if(isOutOfRange()) {
-                                                throw new DOMException('Could not find suitable fallback placement');
-                                            }
-                                            else {
-                                                position();
-                                            }
-                                        }
-                                        else {
-                                            throw new DOMException('Could not find suitable fallback placement');
-                                        }
-                                    }
-                                    else {
-                                        position();
-                                    }
-                                }
-                                else {
-                                    throw new DOMException('Could not find suitable fallback placement');
-                                }
-                            }
-                            else {
-                                position();
-                            }
-                        }
-                        else {
-                            throw new DOMException('Could not find suitable fallback placement');
-                        }
-                    }
-                    else {
-                        position();
-                    }
-                }
-                else {
-                    throw new DOMException('Could not find suitable fallback placement');
+                if (isOutOfRange()) {
+                    placeFallback(fp, index);
+                } else {
+                    return true;
                 }
             };
+
+            function placeAtFallback() {
+                if(!placeFallback(fallbackPlacements.filter(x => /^(top|bottom|left|right)$/.test(x)), 0))
+                    throw new DOMException('Could not find suitable fallback placement');
+            }
 
             let isPopover = tip.hasClass('popover');
             let place = /^(left|right|top|bottom)$/.test(placement) ? placement : (isPopover ? 'right' : 'top');
@@ -1282,6 +1247,9 @@ angular.module('bs5.dom', [])
 
         
         this.contains = function(elm, container) {
+            elm = elm instanceof HTMLElement ? angular.element(elm) : elm;
+            container = container instanceof HTMLElement ? angular.element(container) : container;
+
             let node = elm;
 
             while(node[0] !== container[0] && node.length) {
@@ -1291,10 +1259,12 @@ angular.module('bs5.dom', [])
             return !!node.length;
         };
 
+        
         this.fade = function(elm,  opacity = 1) {
+            elm = elm instanceof HTMLElement ? angular.element(elm) : elm;
+            opacity = opacity < 0 ? 0 : (opacity > 1 ? 1 : opacity);
             return $q(function(r) {
                 new Promise(function (res) {
-                    elm = elm instanceof HTMLElement ? angular.element(elm) : elm;
                     if (elm.hasClass('fade')) {
                         if (elm.hasClass('show')) {
                             elm[0].style.opacity = opacity;
@@ -1420,19 +1390,14 @@ angular.module('bs5.modal', ['bs5.dom'])
         return function(options) {
 
             function show(onShown) {
-                if(container[0] === document.body && $$backdrop.isOpen()) {
-                    $$backdrop.prepend(elm);
-                }
-                else {
-                    container.append(elm);
-                }
+                container.append(elm);
 
                 elm.css('display', 'block');
                 $bs5DOM.fade(elm).then(angular.isFunction(onShown) ? onShown : angular.noop);
             }
 
             function hide(onHidden) {
-                $bs5DOM.fade(elm, 1, 0).then(function() {
+                $bs5DOM.fade(elm).then(function() {
                     elm.remove();
 
                     if(angular.isFunction(onHidden))
@@ -1463,7 +1428,7 @@ angular.module('bs5.modal', ['bs5.dom'])
                 modalDeferred.reject(reason);
                 hide();
 
-                let prevModal = stack.peek();
+                let prevModal = $$stack.peek();
                 if (prevModal)
                     prevModal.show();
             };
@@ -1497,7 +1462,7 @@ angular.module('bs5.modal', ['bs5.dom'])
                 contentDeferred.resolve(options.template);
             }
             else {
-                throw new ReferenceError("Must provide either option template as an html template or option templateUrl as a url or the to an angular script template");
+                throw new ReferenceError("Must provide either the template option as an html template or the templateUrl option as a url or the to an angular script template");
             }
 
             let windowScope = $rootScope.$new();
@@ -1514,7 +1479,7 @@ angular.module('bs5.modal', ['bs5.dom'])
             }
 
             let elm = angular.element(
-                '<div class="modal fade show">' +
+                '<div class="modal fade">' +
                 '<div class="modal-dialog {{size ? \'modal-\' + size : \'\'}}" ng-class="{\'modal-dialog-centered\': centered, \'modal-dialog-scrollable\': scrollable}">' +
                 '<div class="modal-content"></div>' +
                 '</div>' +
@@ -1570,18 +1535,18 @@ angular.module('bs5.modal', ['bs5.dom'])
     }])
 
     .service('$$backdrop', ['$$stack', '$bs5DOM', function($$stack, $bs5DOM) {
-        let backdrop = angular.element('<div class="modal-backdrop fade show"></div>');
+        let backdrop = angular.element('<div class="modal-backdrop fade"></div>');
 
         let $body = angular.element(document.body);
 
         this.open = function() {
             $body.append(backdrop);
-            $bsDOM.fade(backDrop, 0, 0.5);
+            $bsDOM.fade(backDrop, 0.5);
             $body.addClass('modal-open');
         }
 
         this.close = function() {
-            $bs5DOM.fade(backdrop, 0.5, 0).then(function() {
+            $bs5DOM.fade(backdrop, 0.5).then(function() {
                 backdrop.remove();
             });
 
@@ -1590,10 +1555,6 @@ angular.module('bs5.modal', ['bs5.dom'])
 
         this.isOpen =  function() {
             return $body.hasClass('modal-open');
-        }
-
-        this.prepend = function(modal) {
-            backdrop.prepend(modal);
         }
 
         backdrop.on('click', function() {
@@ -2146,8 +2107,7 @@ angular.module('bs5.rating', [])
             require: 'ngModel',
             scope: {
                 readonly: '=?',
-                onRatingChange: '&?',
-                color: '@?'
+                onRatingChange: '&?'
             },
             templateUrl: function(elm, attrs) {
                 return attrs.templateurl || 'angular/bootstrap5/templates/rating/rating.html'
@@ -2165,8 +2125,8 @@ angular.module('bs5.rating', [])
                     scope.value = ctrl.$modelValue;
                 }
 
-                scope.stateOnIcon = attrs.stateOnIcon || 'bi-star-fill';
-                scope.stateOffIcon = attrs.stateOffIcon || 'bi-star';
+                scope.stateOnIcon = attrs.stateOnIcon || 'bi bi-star-fill';
+                scope.stateOffIcon = attrs.stateOffIcon || 'bi bi-star';
 
                 scope.range = [];
 
@@ -2205,7 +2165,7 @@ angular.module('bs5.rating', [])
     .run(['$templateCache', function($templateCache) {
         $templateCache.put(
             'angular/bootstrap5/templates/rating/rating.html',
-            '<i class="bi {{$index < value ? stateOnIcon : stateOffIcon}}" ng-style="{cursor: readonly ? \'inheriit\' : \'pointer\', color: color || \'inherit\', font-size: size || \'inherit\'}" ng-repeat="r in range" ng-mouseenter="enter($index + 1)" ng-click="rate($index + 1)" ng-mouseleave="leave()"></i>'
+            '<i class="{{$index < value ? stateOnIcon : stateOffIcon}}" ng-repeat="r in range" ng-mouseenter="enter($index + 1)" ng-click="rate($index + 1)" ng-mouseleave="leave()"></i>'
         );
     }]);
 
@@ -2215,38 +2175,12 @@ angular.module('bs5.tabs', ['bs5.dom'])
     
     .controller('Bs5TabsetController', ['$scope', function($scope) {
         let ctrl = this;
-        let ndx = null;
+
         ctrl.tabs = [];
-
-        
-        ctrl.select = function(index, evt) {
-            if(evt && evt.target.tagName.toLowerCase() === 'a')
-                evt.preventDefault();
-
-            if(!destroyed) {
-                if(angular.isNumber(ndx) && ctrl.tabs[ndx]) {
-                    ctrl.tabs[ndx].onDeselect({$tabIndex: index, $event: evt});
-                    ctrl.tabs[ndx].active = false;
-                }
-
-                ndx = ctrl.active = index;
-
-                if(angular.isNumber(index) && ctrl.tabs[index]) {
-                    ctrl.tabs[index].onSelect({$tabIndex: index, $event: evt});
-                    ctrl.tabs[index].active = true;
-                }
-            }
-        };
 
         
         ctrl.addTab = function(tab) {
             ctrl.tabs.push(tab);
-
-            let index = ctrl.findTabIndex(tab);
-
-            if(!angular.isNumber(ctrl.active)) {
-                ctrl.select(0);
-            }
         }
 
 
@@ -2256,12 +2190,6 @@ angular.module('bs5.tabs', ['bs5.dom'])
 
             if(index !== null) {
                 ctrl.tabs.splice(index, 1);
-
-                if(index === ctrl.active) {
-                    let newIndex = ctrl.active === ctrl.tabs.length ? ctrl.active - 1 : (ctrl.active + 1) % ctrl.tabs.length;
-                    ndx = ctrl.active = null;
-                    ctrl.select(newIndex);
-                }
             }
         }
 
@@ -2278,11 +2206,6 @@ angular.module('bs5.tabs', ['bs5.dom'])
             return index;
         }
 
-        $scope.$watch('tabset.active', function(val, old) {
-            if(val !== old)
-                ctrl.select(val);
-        });
-
         let destroyed = false;
         $scope.$on('$destroy', function() {
             destroyed = true;
@@ -2298,7 +2221,7 @@ angular.module('bs5.tabs', ['bs5.dom'])
             controller: 'Bs5TabsetController',
             controllerAs: 'tabset',
             templateUrl: function(elm, attrs) {
-                return (attrs.placement === 'left' ? 'angular/bootstrap5/templates/tabs/tabset-left.html' : (attrs.placement === 'right' ? 'angular/bootstrap5/templates/tabs/tabset-right.html' : 'angular/bootstrap5/templates/tabs/tabset-top.html'));
+                return (attrs.vertical === 'true' ? 'angular/bootstrap5/templates/tabs/tabset-vertical.html' : 'angular/bootstrap5/templates/tabs/tabset-horizontal.html');
             },
             link: function(scope, elm, attrs) {
                 scope.type = /^(pills|tabs|underline)$/.test(attrs.type) ? attrs.type : 'tabs';
@@ -2321,7 +2244,7 @@ angular.module('bs5.tabs', ['bs5.dom'])
                 onDeselect: '&tabDeselect'
             },
             templateUrl: function(elm, attrs) {
-                return !(/^(top)$/.test(elm.parent().attr('placement'))) ? 'angular/bootstrap5/templates/tabs/tab-vertical.html' : 'angular/bootstrap5/templates/tabs/tab.html';
+                return $parse(elm.parent().attr('vertical'))() ? 'angular/bootstrap5/templates/tabs/tab-vertical.html' : 'angular/bootstrap5/templates/tabs/tab-horizontal.html';
             },
             controller: function() {},
             controllerAs: 'tab',
@@ -2334,6 +2257,8 @@ angular.module('bs5.tabs', ['bs5.dom'])
                 }
 
                 let tabPane = null;
+                let index = null;
+
                 $timeout(function() {
                     let children = elm.parent().children();
 
@@ -2343,22 +2268,67 @@ angular.module('bs5.tabs', ['bs5.dom'])
                             break;
                     }
 
-                    tabPane = elm.parent().parent()[0].querySelectorAll('.tab-pane')[i];
-                }, 500);
+                    tabPane = angular.element(elm.parent().parent()[0].querySelectorAll('.tab-pane')[tpIndex]);
+                    scope.index = index = i;
+
+                    if(i === 0 && !ctrl.tabs.find(x => x.active)) {
+                        if(tabPane.hasClass('fade'))
+                            tabPane.addClass('show');
+
+                        tabPane.addClass('active');
+                        scope.active = true;
+                    }
+                });
 
                 scope.select = function(evt) {
-                    if(!scope.disabled) {
-                        ctrl.select(ctrl.findTabIndex(scope), evt);
+                    if(!scope.disabled && !tabPane.hasClass('active') && !scope.active) {
+                        let atIndex = null;
+                        let atp = null;
+                        let tps = elm.parent().parent()[0].querySelectorAll('.tab-pane');
+                        for (let i = 0; i < tps.length; i++) {
+                            let el = angular.element(tps[i]);
+                            if(el.hasClass('active')) {
+                                atIndex = i;
+                                atp = el;
+                                break;
+                            }
+                        }
 
-                        $bs5DOM.fade(tabPane);
+                        scope.onDeselect({$tabIndex: atIndex, $event: evt});
+                        ctrl.tabs[atIndex].active = false;
+                        scope.active = true;
+                        $bs5DOM.fade(atp).then(function() {
+                            atp.removeClass('active');
+                            tabPane.addClass('active');
+                            scope.onSelect({$tabIndex: index, $event: evt});
+                            $bs5DOM.fade(tabPane);
+                        });
                     }
-                }
+                };
 
                 scope.$transcludeFn = transclude;
+
                 ctrl.addTab(scope);
+
+                let tpIndex = ctrl.tabs.length - 1;
 
                 scope.$on('$destroy', function() {
                     ctrl.removeTab(scope);
+
+                    if(scope.active) {
+                        scope.active = false;
+                        let i = index === ctrl.tabs.length ? ctrl.tabs.length - 1 : index;
+                        let tab = ctrl.tabs.find(x => x.index === i);
+                        let tpIndex = ctrl.findTabIndex(tab);
+                        let tp = angular.element(elm.parent().parent()[0].querySelector('.tab-pane:nth-child(' + (tpIndex + 1) + ')'));
+
+                        elm.remove();
+                        tabPane.remove();
+
+                        tab.active = true;
+                        tp.addClass('active');
+                        $bs5DOM.fade(tp);
+                    }
                 });
             }
 
@@ -2416,43 +2386,34 @@ angular.module('bs5.tabs', ['bs5.dom'])
 
     .run(['$templateCache', function($templateCache) {
         $templateCache.put(
-            'angular/bootstrap5/templates/tabs/tabset-top.html',
-            '<div class="bs5-tabset-top">' +
+            'angular/bootstrap5/templates/tabs/tabset-horizontal.html',
+            '<div class="bs5-tabset-horizontal">' +
                 '<nav class="nav nav-{{type}} mb-2" ng-class="{\'nav-justified\': justified, \'nav-fill\': fill}" ng-transclude></nav>' +
                 '<div class="tab-content">' +
-                    '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
+                    '<div class="tab-pane fade" ng-repeat="tab in tabset.tabs" bs5-tab-content-transclude="tab"></div>' +
                 '</div>' +
             '</div>'
         );
 
-        $templateCache.put(
-            'angular/bootstrap5/templates/tabs/tab.html',
-            '<a href="#" class="nav-link bs5-tab" ng-class="{active: active, disabled: disabled}" ng-click="select($event)" bs5-tab-heading-transclude>{{heading}}</a>'
-        );
 
         $templateCache.put(
-            'angular/bootstrap5/templates/tabs/tabset-left.html',
-            '<div class="align-items-start bs5-tabset-left">' +
-                '<div class="nav flex-column nav-pills float-start me-3" ng-transclude></div>' +
+            'angular/bootstrap5/templates/tabs/tabset-vertical.html',
+            '<div class="d-flex align-items-start bs5-tabset-vertical">' +
+                '<div class="nav flex-column nav-pills me-3" ng-transclude></div>' +
                 '<div class="tab-content">' +
-                    '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
+                    '<div class="tab-pane fade" ng-repeat="tab in tabset.tabs" bs5-tab-content-transclude="tab"></div>' +
                 '</div>' +
             '</div>'
         );
 
         $templateCache.put(
             'angular/bootstrap5/templates/tabs/tab-vertical.html',
-            '<button class="nav-link text-nowrap overflow-hidden bs5-tab" ng-class="{active: active, disabled: disabled}" ng-disabled="disabled" ng-click="select($event)" bs5-tab-heading-transclude>{{heading}}</button>'
+            '<button class="nav-link bs5-tab text-start" ng-class="{active: active, disabled: disabled}" ng-disabled="disabled" ng-click="select($event)" bs5-tab-heading-transclude>{{heading}}</button>'
         );
 
         $templateCache.put(
-            'angular/bootstrap5/templates/tabs/tabset-right.html',
-            '<div class="align-items-start bs5-tabset-right">' +
-                '<div class="tab-content float-start">' +
-                    '<div class="tab-pane bs5-tab-pane" ng-repeat="tab in tabset.tabs" ng-class="{active: tabset.active === $index}" bs5-tab-content-transclude="tab"></div>' +
-                '</div>' +
-                '<div class="nav flex-column nav-pills ms-3" ng-transclude></div>' +
-            '</div>'
+            'angular/bootstrap5/templates/tabs/tab-horizontal.html',
+            '<a class="nav-link bs5-tab" href ng-class="{active: active, disabled: disabled}" ng-disabled="disabled" ng-click="select($event)" bs5-tab-heading-transclude>{{heading}}</a>'
         );
     }]);
 

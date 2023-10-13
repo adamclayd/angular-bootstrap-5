@@ -38,14 +38,15 @@
         }
     }
 
+    console.log(fake.tabsets);
+    console.log(fake.accordion);
+
 
     angular.module('app', ['ngBootstrap5', 'ngSanitize'])
 
         .controller('MainController', ['$scope', '$bs5Modal', '$log', function ($scope, $bs5Modal, $log) {
             $scope.collapse = new (function () {
                 this.collapsed = false;
-                this.horizontal = false;
-                this.content = fake.collapse;
                 this.toggle = function () {
                     this.collapsed = !this.collapsed;
                 }

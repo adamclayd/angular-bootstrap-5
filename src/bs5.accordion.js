@@ -10,9 +10,6 @@ angular.module('bs5.accordion', ['bs5.collapse'])
         closeOthers: true
     })
 
-    /**
-     * Controller: bs5AccordionController
-     */
     .controller('Bs5AccordionController', ['$scope', '$attrs', 'bs5AccordionConfig', function($scope, $attrs, bs5AccordionConfig) {
         this.groups = [];
 
@@ -102,7 +99,7 @@ angular.module('bs5.accordion', ['bs5.collapse'])
      *
      *      Example:
      *          <bs5-accordion-group>
-     *              <bs5-accordion-header><img src="header.png"></bs5-accordion-header>
+     *              <bs5-accordion-heading><img src="header.png"></bs5-accordion-heading>
      *              ... Accordion Group Content ...
      *          </bs5-accordion-group>
      */
@@ -199,7 +196,7 @@ angular.module('bs5.accordion', ['bs5.collapse'])
             'angular/bootstrap5/templates/accordion/accordion-group.html',
             '<div class="accordion-item">' +
                 '<h2 class="accordion-header">' +
-                    '<button type="button" ng-click="toggleOpen()" ng-class="{collapsed: !isOpen}" class="accordion-button" bs5-accordion-transclude><span bs5-accordion-header>{{heading}}</span></button>' +
+                    '<button type="button" ng-click="toggleOpen()" ng-class="{collapsed: !isOpen}" class="accordion-button" bs5-accordion-transclude="heading"><span bs5-accordion-header>{{heading}}</span></button>' +
                 '</h2>' +
                 '<div class="accordion-collapse" bs5-collapse="!isOpen">' +
                     '<div class="accordion-body">' +

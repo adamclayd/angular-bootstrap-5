@@ -6,52 +6,50 @@ angular.module('bs5.modal', ['bs5.dom'])
     /**
      * Service: $bs5Modal
      *
-     * Opens a modal from the passed
+     * Opens a modal that is created with passed template or templateUrl. If you have a backdrop on one modal and modals without a backdrop
+     * clicking the back drop will dismiss all non-backdrop in front it and the modal with the backdrop
      *
-     * @param options {object} {
-     *     backdrop: <boolean> - put a backdrop up for the modal. When you add a backdrop you can stack up modals without backdrops
-     *                           in front of one with a back drop you can dismiss all the modals going all the way back to the one
-     *                           with the backdrop when you click on the backdrop. {default: false}
+     * @param options {Object} {
+     *     backdrop:       <boolean>                        put a backdrop up for the modal. When you add a backdrop you can stack up modals without backdrops
+     *                                                      in front of one with a back drop you can dismiss all the modals going all the way back to the one
+     *                                                      with the backdrop when you click on the backdrop. {default: false}
      *
-     *     size: <'sm' | 'lg' | 'xl' | null> - bootstrap size for the modal. {default: null}
+     *     size:           <'sm' | 'lg' | 'xl' | null>      bootstrap size for the modal. {default: null}
      *
-     *     centered: <boolean> -  whether to vertically center the modal or not. {default: false}
+     *     centered:       <boolean>                        whether to vertically center the modal or not. {default: false}
      *
-     *     scrollable: <boolean> - whether to make the modal body scrollable. {default: false}
+     *     scrollable:     <boolean>                        whether to make the modal body scrollable. {default: false}
      *
-     *     container: <string | angular.element> - a tag selector or element of where to insert the modal into. {default: 'body'}
+     *     container:       <string | angular.element>      a tag selector or element of where to insert the modal into. {default: 'body'}
      *
-     *     controller <string | Function> - a string containing a defined controller. You can also use the controller as syntax with a string.
-     *                                      Or a controller constructor Function. $scope has properties $scope.modal.promise which is the promise
-     *                                      for the modal, $scope.modal.close(value: any) which will close the modal and resolve the promise with value, and
-     *                                      $scope.modal.dismiss(value: any) closes the modal and rejects the promise with value.
+     *     controller:      <string | Function>             You can use the controller as syntax with a string. Or a you can use controller constructor Function. $scope has
+     *                                                      properties $scope.modal.promise which is the promise for the modal, $scope.modal.close(value: any) which will close
+     *                                                      the modal and resolve the promise with value, and $scope.modal.dismiss(value: any) closes the modal and rejects the
+     *                                                      promise with value.
      *
-     *     template: <string> - required without templateUrl - the html template of the inner modal such as the modal-header, modal-body, and modal-footer
+     *     template:        <string>                        This is required without templateUrl. The html template of the inner modal such as the modal-header, modal-body,
+     *                                                      and modal-footer
      *
-     *     templateUrl: <string> - required without template - the path to the url that has the contains the template or the url to an angular script template
+     *     templateUrl:     <string>                        This is required without template. The path to the url that has the contains the template or the url to an angular
+     *                                                      script template
      *
      * }
      *
-     * @return {{result: promise, close: function, dismiss: function}}  result is the promise that resolves from closing or dismissing, close(value: any) closes the modal and
-     * resolves the promise with value, dismiss(value: any) closes the modal and rejects the promise with value;
+     * @return {{result: $q.promise, close: Function, dismiss: Function}}  result is the promise that resolves from closing or dismissing, close(value: any) closes the modal and
+     * resolves the promise with value, dismiss(value: any) closes the modal and rejects the promise with value.
      */
     .service('$bs5Modal', ['$templateCache', '$controller', '$compile', '$rootScope', '$q', '$document', '$http', '$bs5DOM', '$$stack', '$$backdrop', function($templateCache, $controller, $compile, $rootScope, $q, $document, $http, $bs5DOM, $$stack, $$backdrop) {
         return function(options) {
 
             function show(onShown) {
-                if(container[0] === document.body && $$backdrop.isOpen()) {
-                    $$backdrop.prepend(elm);
-                }
-                else {
-                    container.append(elm);
-                }
+                container.append(elm);
 
                 elm.css('display', 'block');
                 $bs5DOM.fade(elm).then(angular.isFunction(onShown) ? onShown : angular.noop);
             }
 
             function hide(onHidden) {
-                $bs5DOM.fade(elm, 1, 0).then(function() {
+                $bs5DOM.fade(elm).then(function() {
                     elm.remove();
 
                     if(angular.isFunction(onHidden))
@@ -82,7 +80,7 @@ angular.module('bs5.modal', ['bs5.dom'])
                 modalDeferred.reject(reason);
                 hide();
 
-                let prevModal = stack.peek();
+                let prevModal = $$stack.peek();
                 if (prevModal)
                     prevModal.show();
             };
@@ -116,7 +114,7 @@ angular.module('bs5.modal', ['bs5.dom'])
                 contentDeferred.resolve(options.template);
             }
             else {
-                throw new ReferenceError("Must provide either option template as an html template or option templateUrl as a url or the to an angular script template");
+                throw new ReferenceError("Must provide either the template option as an html template or the templateUrl option as a url or the to an angular script template");
             }
 
             let windowScope = $rootScope.$new();
@@ -133,7 +131,7 @@ angular.module('bs5.modal', ['bs5.dom'])
             }
 
             let elm = angular.element(
-                '<div class="modal fade show">' +
+                '<div class="modal fade">' +
                 '<div class="modal-dialog {{size ? \'modal-\' + size : \'\'}}" ng-class="{\'modal-dialog-centered\': centered, \'modal-dialog-scrollable\': scrollable}">' +
                 '<div class="modal-content"></div>' +
                 '</div>' +
@@ -189,18 +187,18 @@ angular.module('bs5.modal', ['bs5.dom'])
     }])
 
     .service('$$backdrop', ['$$stack', '$bs5DOM', function($$stack, $bs5DOM) {
-        let backdrop = angular.element('<div class="modal-backdrop fade show"></div>');
+        let backdrop = angular.element('<div class="modal-backdrop fade"></div>');
 
         let $body = angular.element(document.body);
 
         this.open = function() {
             $body.append(backdrop);
-            $bsDOM.fade(backDrop, 0, 0.5);
+            $bsDOM.fade(backDrop, 0.5);
             $body.addClass('modal-open');
         }
 
         this.close = function() {
-            $bs5DOM.fade(backdrop, 0.5, 0).then(function() {
+            $bs5DOM.fade(backdrop, 0.5).then(function() {
                 backdrop.remove();
             });
 
@@ -209,10 +207,6 @@ angular.module('bs5.modal', ['bs5.dom'])
 
         this.isOpen =  function() {
             return $body.hasClass('modal-open');
-        }
-
-        this.prepend = function(modal) {
-            backdrop.prepend(modal);
         }
 
         backdrop.on('click', function() {

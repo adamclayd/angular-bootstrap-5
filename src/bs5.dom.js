@@ -18,14 +18,15 @@ angular.module('bs5.dom', [])
          * @returns {{top: number, left: number, width: number, height: number}} an offset with width and height components
          */
         this.offset = function(elm) {
-            let rect = elm[0].getBoundingClientRect(),
+            elm = elm instanceof HTMLElement ? elm : elm[0];
+            let rect =  elm.getBoundingClientRect(),
                 scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
                 scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             return {
                 top: rect.top + scrollTop,
                 left: rect.left + scrollLeft,
-                width: elm[0].offsetWidth,
-                height: elm[0].offsetHeight
+                width: elm.offsetWidth,
+                height: elm.offsetHeight
             };
         };
 
@@ -275,7 +276,7 @@ angular.module('bs5.dom', [])
                 let plc = place + '-center';
 
                 return this.positionTargetRelative(tip, arrow, tip, plc, isPopover ? popoverOff : tooltipOff);
-            }
+            };
 
             function getTipPos() {
                 const ttOff = 4;
@@ -289,7 +290,7 @@ angular.module('bs5.dom', [])
                 return rel ?
                     this.positionTargetRelative(host, tip, rel, plc, isPopover ? popoverOff : tooltipOff) :
                     this.positionTarget(host, tip, plc, isPopover ? popoverOff : tooltipOff);
-            }
+            };
 
             function getPlacementClass() {
                 let lastPlcClass;
@@ -307,7 +308,7 @@ angular.module('bs5.dom', [])
                     lastPlcClass = isPopover ? 'bs-popover-bottom' :  'bs-tooltip-bottom';
 
                 return lastPlcClass;
-            }
+            };
 
             function positionLeftRight() {
                 if(tipPos.left < coff.left) {
@@ -331,7 +332,7 @@ angular.module('bs5.dom', [])
                         throw new DOMException('The tooltip element is too wide to fit in the container')
                     }
                 }
-            }
+            };
 
             function positionTopBottom() {
                 if(tipPos.top < coff.top) {
@@ -354,82 +355,41 @@ angular.module('bs5.dom', [])
                         throw new DOMException('The tooltip element is too tall to fit in');
                     }
                 }
-            }
+            };
 
             function isOutOfRange() {
                 return (place === 'left' && tipPos.left < coff.left) ||
                     (place === 'right' && tipPos.left + tip[0].offsetWidth > coff.left + coff.width) ||
                     (place === 'top' && tipPos.top < coff.top) ||
                     (place === 'bottom' && tipPos.top + tip[0].offsetHeight > coff.top + coff.height);
-            }
+            };
 
-            function placeAtFallback() {
-                let fp = fallbackPlacements.filter(x => /^(top|bottom|left|right)$/.test(x));
+            function placeFallback(fp, index) {
                 let position = () => {
-                    if(place === 'left' || place === 'right')
+                    if (place === 'left' || place === 'right')
                         positionTopBottom();
                     else
                         positionLeftRight();
                 };
 
-                if(fp.length > 0) {
-                    place = fb[0];
-                    tipPos = getTipPos();
-                    arrowPos = getArrowPos();
+                if (index >= fp.length)
+                    return false;
 
-                    if(isOutOfRange()) {
-                        if(fp.length > 1) {
-                            place = fb[1];
-                            tipPos = getTipPos();
-                            arrowPos = getArrowPos();
+                place = fb[index];
+                tipPos = getTipPos();
+                arrowPos = getArrowPos();
 
-                            if(isOutOfRange()) {
-                                if(fp.length > 2) {
-                                    place = fb[2];
-                                    tipPos = getTipPos();
-                                    arrowPos = getArrowPos();
-
-                                    if(isOutOfRange) {
-                                        if(fp.length > 3) {
-                                            place = fb[3];
-                                            tipPos = getTipPos();
-                                            arrowPos = getArrowPos();
-
-                                            if(isOutOfRange()) {
-                                                throw new DOMException('Could not find suitable fallback placement');
-                                            }
-                                            else {
-                                                position();
-                                            }
-                                        }
-                                        else {
-                                            throw new DOMException('Could not find suitable fallback placement');
-                                        }
-                                    }
-                                    else {
-                                        position();
-                                    }
-                                }
-                                else {
-                                    throw new DOMException('Could not find suitable fallback placement');
-                                }
-                            }
-                            else {
-                                position();
-                            }
-                        }
-                        else {
-                            throw new DOMException('Could not find suitable fallback placement');
-                        }
-                    }
-                    else {
-                        position();
-                    }
-                }
-                else {
-                    throw new DOMException('Could not find suitable fallback placement');
+                if (isOutOfRange()) {
+                    placeFallback(fp, index);
+                } else {
+                    return true;
                 }
             };
+
+            function placeAtFallback() {
+                if(!placeFallback(fallbackPlacements.filter(x => /^(top|bottom|left|right)$/.test(x)), 0))
+                    throw new DOMException('Could not find suitable fallback placement');
+            }
 
             let isPopover = tip.hasClass('popover');
             let place = /^(left|right|top|bottom)$/.test(placement) ? placement : (isPopover ? 'right' : 'top');
@@ -489,11 +449,14 @@ angular.module('bs5.dom', [])
         /**
          * Check whether an element is contained in another or not
          *
-         * @param elm {angular.element} the element to search for
-         * @param container {angular.element} the container element to search in
+         * @param elm {angular.element | HTMLElement} the element to search for
+         * @param container {angular.element | HTMLElement} the container element to search in
          * @return {boolean}
          */
         this.contains = function(elm, container) {
+            elm = elm instanceof HTMLElement ? angular.element(elm) : elm;
+            container = container instanceof HTMLElement ? angular.element(container) : container;
+
             let node = elm;
 
             while(node[0] !== container[0] && node.length) {
@@ -503,10 +466,20 @@ angular.module('bs5.dom', [])
             return !!node.length;
         };
 
+        /**
+         * Bootstrap 5's fade effect. This will animate the fade effect if the element has the 'fade' class.
+         * If the element has the 'show' class the animation will fade out and if it does not the animation
+         * will fade in
+         * @param elm {angular.element | HTMLElement} element to aqnimate
+         * @param opacity {number} Number between 0 and 1. What the elements opacity should be when it is
+         * completely visible. {default: 1}
+         * @return {$q.promise<void>} a promise that is resolved when the animation is done
+         */
         this.fade = function(elm,  opacity = 1) {
+            elm = elm instanceof HTMLElement ? angular.element(elm) : elm;
+            opacity = opacity < 0 ? 0 : (opacity > 1 ? 1 : opacity);
             return $q(function(r) {
                 new Promise(function (res) {
-                    elm = elm instanceof HTMLElement ? angular.element(elm) : elm;
                     if (elm.hasClass('fade')) {
                         if (elm.hasClass('show')) {
                             elm[0].style.opacity = opacity;
