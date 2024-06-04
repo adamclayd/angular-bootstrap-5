@@ -1,4 +1,4 @@
-# Bootstrap 5 for AngularJS v1.8.3]
+# Bootstrap 5 for AngularJS v1.8.3
 
 Directives and services that work with Bootstrap 5.
 It has been tested and works with Bootstrap v5.1.3.
