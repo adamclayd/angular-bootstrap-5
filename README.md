@@ -5,7 +5,7 @@ It has been tested and works with Bootstrap v5.1.3.
 
 ## Download
 #### [Source Code](https;//github.com/adamclayd/angular-bootstrap-5)
-#### 
+#### <a href="https://github.com/adamclayd/angular-bootstrap-5/archive/refs/heads/master.zip" download="angular-bootstrap-5">Zip File</a>
 
 ## Setup
 
