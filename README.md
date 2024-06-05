@@ -3,8 +3,7 @@
 Directives and services that work with Bootstrap 5.
 It has been tested and works with Bootstrap v5.1.3.
 
-## Download
-#### [Github](https;//github.com/adamclayd/angular-bootstrap-5)
+#### [Download From Github](https;//github.com/adamclayd/angular-bootstrap-5)
 
 ## Setup
 
