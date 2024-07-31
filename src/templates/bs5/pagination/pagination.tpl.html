@@ -1,0 +1,22 @@
+<nav>
+    <ul class="pagination {{size === 'lg' || size === 'sm' ? 'pagination-' + size : ''}}" ng-class="{'justify-content-center': align === 'center', 'justify-content-end': align === 'right'}">
+        <li class="page-item" ng-if="withFirstLast && numberPages > pageRange" ng-disabled="currentPage <= 1" ng-class="{disabled: currentPage <= 1}">
+            <a class="page-link" href="#" ng-click="changePage(1, $event)">{{firstPageText}}</a>
+        </li>
+        <li class="page-item" ng-if="withPreviousNext" ng-disabled="currentPage <= 1" ng-class="{disabled: currentPage <= 1}">
+            <a class="page-link" href="#" ng-click="changePage(currentPage - 1, $event)">{{previousPageText}}</a>
+        </li>
+        <li class="page-item" ng-repeat-start="page in pages" ng-if="page !== currentPage">
+            <a class="page-link" href="#" ng-click="changePage(page, $event)">{{page}}</a>
+        </li>
+        <li class="page-item active" ng-repeat-end ng-if="page === currentPage">
+            <a class="page-link" href="#" ng-click="$event.preventDefault()">{{page}}</a>
+        </li>
+        <li class="page-item" ng-if="withPreviousNext" ng-disabled="currentPage >= numberPages" ng-class="{disabled: currentPage >= numberPages}">
+            <a class="page-link" href="#" ng-click="changePage(currentPage + 1, $event)">{{nextPageText}}</a>
+        </li>
+        <li class="page-item" ng-if="withFirstLast && numberPages > pageRange" ng-disabled="currentPage >= numberPages" ng-class="{disabled: currentPage >= numberPages}">
+            <a class="page-link" href="#" ng-click="changePage(numberPages, $event)">{{lastPageText}}</a>
+        </li>
+    </ul>
+</nav>

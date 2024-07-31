@@ -1,0 +1,5 @@
+<ul class="list-group">
+    <li class="list-group-item" ng-repeat="item in items" ng-mousedown="selectItem()" ng-mouseenter="highlight($index)" ng-class="{active: highlighted === $index}" ng-mouseleave="uhighlight()">
+        {{item}}
+    </li>
+</ul>

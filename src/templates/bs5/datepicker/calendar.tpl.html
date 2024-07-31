@@ -1,0 +1,42 @@
+<div class="card calendar">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12">
+                <p class="text-end"><button type="button" class="btn-close" ng-click="close()"></button></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-2">
+                <button type="button" class="btn btn-light" ng-click="previousMonth()" style="width: 100%;">&lt;</button>
+            </div>
+            <div class="col-8">
+                <p class="text-center">{{month}} {{year}}</p>
+            </div>
+            <div class="col-2">
+                <button type="button" class="btn btn-light" style="width: 100%;" ng-click="nextMonth()">&gt;</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <table class="table table-bordered">
+                    <tbody>
+                    <tr>
+                        <td class="text-center"><strong>Sun</strong></td>
+                        <td class="text-center"><strong>Mon</strong></td>
+                        <td class="text-center"><strong>Tue</strong></td>
+                        <td class="text-center"><strong>Wed</strong></td>
+                        <td class="text-center"><strong>Thur</strong></td>
+                        <td class="text-center"><strong>Fri</strong></td>
+                        <td class="text-center"><strong>Sat</strong></td>
+                    </tr>
+                    <tr ng-repeat="row in calendar">
+                        <td ng-repeat="cell in row">
+                            <button class="btn" ng-class="{'btn-light': !cell.selected, 'btn-primary': cell.selected, disabled: !cell.date || (minDate && cell.date < minDate) || (maxDate && cell.date > maxDate)}" ng-disabled="!cell.date || (minDate && cell.date < minDate) || (maxDate && cell.date > maxDate)" ng-click="selectCell(cell)" style="width: 100%;">{{cell.number}}</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

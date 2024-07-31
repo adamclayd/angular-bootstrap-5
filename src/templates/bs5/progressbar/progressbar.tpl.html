@@ -1,0 +1,5 @@
+<div class="progress">
+    <div class="progress-bar {{type ? 'bg-' + type : ''}}" ng-class="{'progress-bar-striped': striped, 'progress-bar-animated': animate}" style="width: {{value}}%" aria-valuenow="{{value}}" aria-valuemin="0" aria-valuemax="100">
+        <span ng-if="displayPercent">{{value}}%</span>
+    </div>
+</div>

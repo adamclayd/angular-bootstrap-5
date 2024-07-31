@@ -1,0 +1,6 @@
+<div class="bs5-tabset">
+    <nav class="nav nav-{{type}} mb-2" ng-class="{'nav-justified': justified, 'nav-fill': fill}" ng-transclude></nav>
+    <div class="tab-content">
+        <div class="tab-pane fade" ng-repeat="tab in tabset.tabs" bs5-tab-content-transclude="tab"></div>
+    </div>
+</div>

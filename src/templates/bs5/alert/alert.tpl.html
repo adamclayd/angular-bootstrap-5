@@ -1,0 +1,4 @@
+<div class="alert alert-{{type}} alert-dismissible d-flex align-items-center" role="alert">
+    <ng-transclude></ng-transclude>
+    <button ng-if="dismissible" ng-click="close()" type="button" class="btn-close"></button>
+</div>

@@ -1,0 +1,9 @@
+bs5-autocomplete-list {
+    position: absolute;
+    overflow-x: hidden;
+    z-index: 9999;
+}
+
+bs5-autocomplete-list li {
+    cursor: pointer;
+}

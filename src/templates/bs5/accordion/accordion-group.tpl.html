@@ -1,0 +1,10 @@
+<div class="accordion-item">
+    <h2 class="accordion-header">
+        <button type="button" ng-click="toggleOpen()" ng-class="{collapsed: !isOpen}" class="accordion-button" bs5-accordion-transclude="heading"><span bs5-accordion-header>{{heading}}</span></button>
+    </h2>
+    <div class="accordion-collapse" bs5-collapse="!isOpen">
+        <div class="accordion-body">
+            <ng-transclude></ng-transclude>
+        </div>
+    </div>
+</div>

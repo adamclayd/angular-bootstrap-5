@@ -1,0 +1,25 @@
+bs5-rating {
+    display: inline-block;
+}
+
+bs5-rating:not(.readonly) > *, [bs5-rating]:not(.readonly) > * {
+    cursor: pointer;
+}
+
+bs5-rating.disabled > *, [bs5-rating].disabled > * {
+    cursor: not-allowed;
+    filter: grayscale(60%);
+    opacity: 0.17;
+}
+
+bs5-rating-partial > span {
+    position: relative;
+}
+
+bs5-rating-partial > span > span {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 0px;
+    overflow: hidden;
+}

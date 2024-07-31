@@ -1,0 +1,15 @@
+#tabset-vertical, #tabset-horizontal {
+    height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    scrollbar-width: none;
+}
+
+.bs5-tabset-right .bs5-tab {
+    text-align: left;
+}
+
+.bs5-tabset-left .bs5-tab {
+    text-align: right;
+}
