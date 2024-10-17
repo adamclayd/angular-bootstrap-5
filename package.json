@@ -1,7 +1,7 @@
 {
   "name": "angularjs-bootstrap-5",
-  "version": "2.0.0",
-  "description": "Angular JS implemetations of Bootstrap 5 components",
+  "version": "1.1.1",
+  "description": "Angular JS implementations of Bootstrap 5 components",
   "main": "Gruntfile.js",
   "directories": {
     "lib": "lib"

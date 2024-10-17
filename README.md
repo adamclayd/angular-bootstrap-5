@@ -1,5 +1,5 @@
 # angular-bootstrap-5
-###### Version 1.1.0
+###### Version 1.1.1
 
 ### Bootstrap 5 for Angular JS
 <p style="color: gray">Bootstrap Version:&nbsp;5.3.3</p>
@@ -13,7 +13,7 @@
 
 ### Setup
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.css" />
 ```
 
 ```html
@@ -644,7 +644,7 @@ Restricted To: <span class="green">AC</span>
 Remote code for https://apis.adamclayd.workers.dev/ngbs5/examples/autocomplete
 ```js
 function autocompeteEx(request) {
-    let term = new URL(request.url).searchParams().get('term') || '';
+  let term = new URL(request.url).searchParams().get('term') || '';
 
   let names = ["Simeon Ortiz", "Liliane Bashirian", "David Ryan", "Carson O'Kon", "Sarina Kirlin", "Trudie Orn", "Deshawn Jast",
     "Christiana Rempel", "Daphne Raynor", "Cecelia Rice", "Merl Brekke", "Josie Hagenes", "Christine Jacobs", "Raegan West",
@@ -680,16 +680,49 @@ module.controller('MainController', ['$scope', function($scope) {
     "Felicita Jakubowski", "Cade Crona", "Dena Kozey", "Urban Wilderman", "Marcelina Bayer"]
 }]);
 ```
+## Datepicker
+### Directive: bs5Datepicker
+Restricted To: E
+
+###### Attributes
+```
+{Date}     minDate   - (Optional) Date that limits the user to picking dates that are greater than this value
+
+{Date}     maxDate   - (Optional) Date that limits the user to picking dates that are less than this value
+
+{string}   name      - (Optional) Name of the  form control
+
+{string}   size      - (Optional) Set the size of the form control. Valid values are 'sm' or 'lg'
+                                                              
+{Date}     ngModel   - (Required)
+```
+
+###### Example
+```html
+<div ng-controller="MainController">
+    <bs5-datepicker min-date="minDate" ng-model="model"></bs5-datepicker>
+</div>
+```
+
+```js
+module.controller('MainController', ['$scope', function($scope) {
+    $scope.minDate = new Date('2023-01-01');
+}]);
+```
 
 ## Further Documentation
 There will be full documentation with runnable examples will be added to the next push of this repo and be accessible on
 the github.io site for this repo
 
-For now you can look at the source code in the [src](https://github.com/adamclayd/angular-bootstrap-5/tree/v1.1.0/src) 
+For now you can look at the source code in the [src](https://github.com/adamclayd/angular-bootstrap-5/tree/master/src) 
 directory. The documentation is in the ngdoc blocks of the *.js files.
 
+## Change Logs
 
-#### Change Log
+#### Angular Bootstrap 5 v1.1.1
+* Added datepicker
+
+#### Angular Bootstrap 5 v1.1.0
 * Added icons module
 
 * Removed Bootstrap 5 Datepicker. Use the `input[date]` directive instead.

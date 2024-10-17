@@ -34,10 +34,27 @@ angular.module('bs5.accordion', ['bs5.dom'])
         closeOthers: true
     })
 
+    /**
+     * @ngdoc type
+     * @name bs5Accordion.AccordionController
+     *
+     * @description
+     * Controller that contains methods for manipulating an accordion
+     */
     .controller('Bs5AccordionController', ['$scope', '$attrs', 'bs5AccordionConfig', function($scope, $attrs, bs5AccordionConfig) {
         this.groups = [];
         let self = this;
 
+        /**
+         * @ngdoc method
+         * @name bs5Accordion.AccordionController#closeOthers
+         *
+         * @param {$rootScope.Scope} openGroup
+         * The accordion group that is to be left open
+         *
+         * @description
+         * Closes all other accordion groups within the accordion except for the one passed to `openGroup`
+         */
         this.closeOthers = function (openGroup) {
             let closeOthers = angular.isDefined($attrs.closeOthers) ? $scope.$eval($attrs.closeOthers) : bs5AccordionConfig.closeOthers;
             if (closeOthers) {
@@ -48,6 +65,16 @@ angular.module('bs5.accordion', ['bs5.dom'])
             }
         };
 
+        /**
+         * @ngdoc method
+         * @name bs5Accordion.AccordionController#addGroup
+         *
+         * @param {$rootScope.Scope} groupScope
+         * The scope of an accordion group to add
+         *
+         * @description
+         * Add an accordion group to the accordion
+         */
         this.addGroup = function (groupScope) {
             self.groups.push(groupScope);
             groupScope.$on('$destory', function (event) {
@@ -55,6 +82,16 @@ angular.module('bs5.accordion', ['bs5.dom'])
             });
         };
 
+        /**
+         * @ngdoc method
+         * @name bs5Accordion.AccordionController#removeGroup
+         *
+         * @param {$rootScope.Scope} group
+         * The scope of an accordion group to remove
+         *
+         * @description
+         * Remove an accordion group from the accordion
+         */
         this.removeGroup = function (group) {
             let index = self.groups.indexOf(group);
             if (index >= 0)

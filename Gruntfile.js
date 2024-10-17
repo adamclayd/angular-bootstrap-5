@@ -1,10 +1,10 @@
 const colors = require('ansi-colors');
+const fs = require('fs');
 
 module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.loadNpmTasks('grunt-docular');
 
 
     grunt.initConfig({
@@ -35,44 +35,7 @@ module.exports = function(grunt) {
                 dest: 'build/<%= filename %>.min.js',
             }
         },
-        docular: {
-            baseUrl: '/angular-bootstrap-5/docs/',
-            useHtml5Mode: false,
-            docular_webapp_target: 'docs',
-            showAngularDocs: '1.8.2',
-            groupId: 'ngbs5',
-            groupTitle: 'Angular Bootstrap 5',
-            files: grunt.file.expand(['src/*.js']),
-            examples: {
-                include: {
-                    angular: false,
-                    js: [
-                        './docfiles/angular.js',
-                        './docfiles/angular-bootstrap-5.min.js'
-                    ],
-                    css: [
-                        './docfiles/bootstrap.min.css'
-                    ]
-                }
-            }
-        },
-        copy: {
-            docFiles: {
-                files: [
-                    {
-                        flatten: true,
-                        expand: true,
-                        src: ['build/angular-bootstrap-5.js', 'lib/css/bootstrap.min.css', 'lib/js/angular.js'],
-                        dest: 'docs/docfiles'
-                    }
-                ]
-           }
-        }
-
     });
-
-
-    grunt.registerTask('docs', 'docular', 'copy:docFiles');
 
     grunt.registerTask('build', 'Create the build file',  function() {
         let done = this.async();

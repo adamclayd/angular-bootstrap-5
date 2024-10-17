@@ -266,7 +266,7 @@
                             <bs5-rating ng-model="rating.model" number="10" color="goldenrod" size="24"></bs5-rating>
                         </div>
                         <div class="col-2">
-                            Value: {{rating.model}}
+                            Value: {{rating.model}} n
                         </div>
                     </div>
                     <br><br><br><br>
@@ -274,6 +274,13 @@
                     <div class="row">
                         <div class="col-5 col-md-4 col-lg-3">
                             <input bs5-autocomplete type="text" ng-model="autocomplete.model" class="form-control" remote-addr="https://apis.adamclayd.workers.dev/ngbs5/examples/autocomplete">
+                        </div>
+                    </div>
+                    <br><br><br><br>
+                    <h4>Datepicker</h4>
+                    <div class="row">
+                        <div class="col-5 col-md-4 col-lg-3">
+                            <bs5-datepicker ng-model="datepicker.model"></bs5-datepicker>
                         </div>
                     </div>
                     <br><br><br><br>

@@ -1,4 +1,8 @@
-<div class="card calendar">
+<div class="input-group {{size ? 'input-group-' + size : ''}}">
+    <input type="text" class="form-control" disabled>
+    <button type="button" class="btn btn-primary" ng-click="open()"><bs5-icon icon="calendar3"</button>
+</div>
+<div class="card calendar fade">
     <div class="card-body">
         <div class="row">
             <div class="col-12">
@@ -7,13 +11,28 @@
         </div>
         <div class="row">
             <div class="col-2">
-                <button type="button" class="btn btn-light" ng-click="previousMonth()" style="width: 100%;">&lt;</button>
+                <button type="button" class="btn btn-light" ng-click="previousMonth()" style="width: 100%;">
+                    <bs5-icon icon="chevron-left"></bs5-icon>
+                </button>
             </div>
             <div class="col-8">
-                <p class="text-center">{{month}} {{year}}</p>
+                <div class="row">
+                    <div class="col-6">
+                        <select class="form-control form-control-sm" ng-model="month" ng-change="changeMonth()">
+                            <option ng-repeat="m in months" ng-value="$index">{{m}}</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <select class="form-control form-control-sm" ng-model="year" ng-change="changeYear()">
+                            <option ng-repeat="y in years" ng-value="y">{{y}}</option>
+                        </select>
+                    </div>
+                </div>
             </div>
             <div class="col-2">
-                <button type="button" class="btn btn-light" style="width: 100%;" ng-click="nextMonth()">&gt;</button>
+                <button type="button" class="btn btn-light" style="width: 100%;" ng-click="nextMonth()">
+                    <bs5-icon icon="chevron-right"></bs5-icon>
+                </button>
             </div>
         </div>
         <div class="row">

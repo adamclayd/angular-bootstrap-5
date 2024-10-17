@@ -270,7 +270,7 @@ angular.module('bs5.dom', [])
          *
          * @param {string} placement
          * A string that can be any of the following:
-         * | value            |  Details                                                                                 |
+         * | value             |  Details                                                                                             |
          * |-------------------|-----------------------------------------------------------------------------------------------------|
          * | `'top'`           | Will return a new position where targetElment be placed to the top of  hostElm                      |
          * | `'left'`          | Will return a new position where targetElm  can be placed to the left of  hostElm                   |
@@ -926,6 +926,24 @@ angular.module('bs5.dom', [])
             return
                 property.endsWith('ms') ? parseFloat(property.substring(0, property.length - 2)) :
                 (prop.endsWith('s') ? parseFloat(property.substring(0, property.length - 1) * 1000) : 0);
+        }
+
+        /**
+         * @ngdoc method
+         * @name $bs5DOM#translate
+         *
+         * @param {DOMElement} elm
+         * The element to translate
+         *
+         * @param {number} x
+         * The horizontal number in pixels to translate by
+         * @param {number} y
+         * The vertical number in pixels to translate by.
+         */
+        this.translate = function (elm, x, y) {
+            elm = elm instanceof HTMLElement ? elm : elm[0];
+
+            elm.style.transform = `translate(${x}px, ${y}px)`;
         }
 
         /**
