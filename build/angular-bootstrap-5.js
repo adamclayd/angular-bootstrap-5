@@ -1,7 +1,7 @@
 /*
  * angularjs-bootstrap-5
  *
- * Version: 1.1.1 - 2024-10-17
+ * Version: 1.1.1 - 2024-10-18
  * 
  * Author: Adam Davis
  * 
@@ -1851,30 +1851,35 @@ angular.module('bs5.pagination', [])
                     return ret;
                 }
 
+                function pagesLtRange() {
+                    return scope.numberPages < scope.pageRange;
+                }
+
                 function displayPages() {
                     let page = scope.currentPage;
                     let r = page % scope.pageRange;
                     let r2 = page + (scope.pageRange - r);
                     let r1 = page - r;
 
-                    if (scope.numberPages < scope.pageRange) {
-                        r1 = 1;
+                    if (pagesLtRange()) {
+                        r1 = 0;
                         r2 = scope.numberPages;
-                    } else if (r2 >= scope.numberPages) {
+                    } else if (r2 > scope.numberPages) {
                         r2 = scope.numberPages;
                         r1 = r2 - scope.pageRange;
                     }
 
-                    if(scope.pivot) {
+                    if(!pagesLtRange() && scope.pivot) {
                         let pivot = Math.ceil(scope.pageRange / 2);
 
-                        if(page >= pivot) {
-                            r1 = page - pivot;
-                            r2 = r1 + scope.pageRange;
 
-                            if(r2 >= scope.numberPages) {
+                        if(page >= pivot) {
+                            r1 = pagesLtRange() ? 0 : page - pivot;
+                            r2 = r1 + (pagesLtRange() ? scope.numberPages : scope.pageRange);
+
+                            if(r2 > scope.numberPages) {
                                 r2 = scope.numberPages;
-                                r1 = r2 - scope.pageRange;
+                                r1 = r2 - (pagesLtRange() ? scope.numberPages : scope.pageRange);
                             }
                         }
                     }
